@@ -1,0 +1,43 @@
+
+@import '../../../../../../assets/sass//general.scss';
+.nav-tabs.responsive-tabs.nav {
+  justify-content: center;
+  box-shadow: 0 0 20px rgba(82, 82, 82, 0.193);
+  border-radius: 10px;
+  width: 100%;
+  margin: 0 auto;
+  border: none;
+}
+
+.sub-menu-item.nav-link.nav-item {
+  align-items: center;
+  background-color: $sunarp-white !important;
+  border-radius: 10px;
+  border: none;
+  color: #989898 !important;
+  display: flex;
+  font-family: $ff-gotham-medium !important;
+  justify-content: center;
+  margin-bottom: 0;
+  text-align: center;
+  transition: 350ms all ease;
+  width: calc(100% / 4);
+
+  &.active {
+      background-color: $sunarp-cyan !important;
+      border: none !important;
+      color: $sunarp-white !important;
+      font-family: $ff-gotham-medium !important;
+  }
+}
+
+.nav-tabs.nav-link:hover,
+.nav-tabs.nav-link:focus {
+  border: none !important;
+}
+
+.nav-tabs.nav-link {
+  border: none !important;
+  margin-bottom: 0;
+}
+

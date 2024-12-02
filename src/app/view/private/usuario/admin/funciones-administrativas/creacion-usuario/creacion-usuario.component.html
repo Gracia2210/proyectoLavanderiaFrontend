@@ -1,0 +1,268 @@
+<h3 class="mt-4 mb-4 h3-sunarp">Registrar Usuarios en el Sistema</h3>
+<div class="row mb-4">
+  <div class="col-md-12 col-lg-12">
+    <form [formGroup]="formBusqueda" (ngSubmit)="buscar()">
+      <div class="row">
+        <div class="col-lg-3 col-md-12 mt-2">
+          <label class="label-sunarp">Nombres</label>
+          <input formControlName="nombre" class="form-control-sunarp text-uppercase" type="text">
+        </div>
+        <div class="col-lg-3 col-md-12 mt-2">
+          <label class="label-sunarp">Paterno</label>
+          <input formControlName="apellidoPaterno" class="form-control-sunarp text-uppercase" type="text">
+        </div>
+        <div class="col-lg-3 col-md-12 mt-2">
+          <label class="label-sunarp">Materno</label>
+          <input formControlName="apellidoMaterno" class="form-control-sunarp text-uppercase" type="text">
+        </div>
+        <div class="col-lg-3 col-md-12 mt-2">
+          <label class="label-sunarp">Usuario</label>
+          <input formControlName="usuario" class="form-control-sunarp text-uppercase" type="text">
+        </div>
+      </div>
+      <div class="w-100 text-center mt-4">
+        <button style="margin-right: 20px;" type="submit" class="btn-sunarp-green btn-reload-tabla"><i
+            class="fa fa-search icon-sunarp"></i>Buscar</button>
+        <button style="margin-right: 20px;" (click)="accionArchivo(1)" type="button"
+          class="btn-sunarp-cyan btn-reload-tabla"><i class="fa fa-user icon-sunarp"></i>Registrar</button>
+        <button Style="margin-right: 20px;" (click)="limpiar()" type="button" class="btn-sunarp-red mr-2"><i
+            class="fa fa-refresh icon-sunarp"></i>Limpiar</button>
+        <button (click)="accionMasivaModal()" type="button" class="btn-sunarp-yellow mr-2"><i
+            class="fa fa-upload icon-sunarp"></i>Registro Masivo</button>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="mt-2">
+  <div class="table-responsive">
+    <table datatable class="table thead-sunarp" datatable [dtOptions]="datatable_usuario"
+      [dtTrigger]="datatable_dtTrigger_usuario">
+      <thead>
+        <tr>
+          <th style="width: 30px" class="text-center">N°</th>
+          <th class="text-center">Usuario</th>
+          <th class="text-center">Nombre</th>
+          <th class="text-center">Paterno</th>
+          <th class="text-center">Materno</th>
+          <th class="text-center">Sexo</th>
+          <th class="text-center">Telefono</th>
+          <th class="text-center">Escuela Profesional</th>
+          <th class="text-center">Opciones</th>
+        </tr>
+      </thead>
+      <tbody>
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<ng-template #modal_ver_usuario let-c="close" let-d="dismiss">
+  <div class="modal-content">
+    <div class="modal-header bg-sunarp-gray-dark">
+      <h3 class="modal-title h3-sunarp text-white">EPICSBOT</h3>
+      <button tabindex="-1" type="button" class="close" aria-label="Close"
+        style="overflow:hidden; position: absolute; right: 30px; top: 1px;background-color: transparent;border: 0px;"
+        (click)="modal_ver_usuario_va.close();">
+        <span aria-hidden="true" style="font-size:35px !important;" class="text-white">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body pl-5 pb-4 pr-5 pt-4">
+      <h2 class="title-typ-devo text-center" style="font-size: 35px;">{{tipoAccion==1?'CREAR':'EDITAR'}} <span
+          class="text-sunarp-green"> USUARIO</span>
+      </h2>
+      <form [formGroup]="formUsuario">
+        <div class="row">
+          <div class="col-md-12 col-lg-12">
+            <h5 class="mt-3 text-sunarp-cyan">Datos del Usuario</h5>
+            <div class="row">
+              <div class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">Nombre</label>
+                <input (input)="convertirEnMayusculas('nombre')" formControlName="nombre" maxlength="250" type="text"
+                  class="form-control-sunarp">
+                <small *ngIf="formBusValid && fBus.nombre.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+                <small *ngIf="formBusValid && fBus.nombre.errors?.onlyletter_invalid"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo solo deben ser letras</small>
+              </div>
+              <div class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">Sexo</label>
+                <ng-select formControlName="sexo" bindLabel="nombre" bindValue="cod" placeholder="SELECCIONA">
+                  <ng-option [value]="''">SELECCIONA</ng-option>
+                  <ng-option *ngFor="let item of listaSexo" [value]="item.cod">
+                    {{item.nombre}}</ng-option>
+                </ng-select>
+                <small *ngIf="formBusValid && fBus.sexo.errors?.required" class="invalid-feedback-sunarp p-0 mt-2">Este
+                  campo es requerido</small>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">Paterno</label>
+                <input (input)="convertirEnMayusculas('apellidoPaterno')" formControlName="apellidoPaterno"
+                  maxlength="250" type="text" class="form-control-sunarp">
+                <small *ngIf="formBusValid && fBus.apellidoPaterno.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+                <small *ngIf="formBusValid && fBus.apellidoPaterno.errors?.onlyletter_invalid"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo solo deben ser letras</small>
+              </div>
+              <div class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">Materno</label>
+                <input (input)="convertirEnMayusculas('apellidoMaterno')" formControlName="apellidoMaterno"
+                  maxlength="250" type="text" class="form-control-sunarp">
+                <small *ngIf="formBusValid && fBus.apellidoMaterno.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+                <small *ngIf="formBusValid && fBus.apellidoMaterno.errors?.onlyletter_invalid"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo solo deben ser letras</small>
+              </div>
+            </div>
+            <!--  <div class="row">
+              <div class="col-lg-8 col-md-12 mt-2">
+                <label class="label-sunarp">Correo Electrónico</label>
+                <input (input)="convertirEnMinusculas('email')" formControlName="email" maxlength="250" type="text"
+                  class="form-control-sunarp">
+                <small *ngIf="formBusValid && fBus.email.errors?.required" class="invalid-feedback-sunarp p-0 mt-2">Este
+                  campo es requerido</small>
+                <small *ngIf="formBusValid && fBus.email.errors?.email" class="invalid-feedback-sunarp p-0 mt-2">El
+                  Correo es inválido</small>
+              </div>
+            </div>-->
+            <div class="row">
+              <div class="col-lg-8 dscol-md-12 mt-2">
+                <label class="label-sunarp">Escuela Profesional:</label>
+                <ng-select formControlName="idCarrera" bindLabel="nombre" bindValue="cod" placeholder="SELECCIONA">
+                  <ng-option [value]="''">SELECCIONA</ng-option>
+                  <ng-option *ngFor="let item of listaCarrera" [value]="item.cod">
+                    {{item.nombre}}</ng-option>
+                </ng-select>
+                <small *ngIf="formBusValid && fBus.idCarrera.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+              </div>
+              <div class="col-lg-4 col-md-12 mt-2">
+                <label class="label-sunarp">Teléfono</label>
+                <input formControlName="telefono" maxlength="250" type="text" class="form-control-sunarp">
+                <small *ngIf="formBusValid && fBus.telefono.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+                <small *ngIf="formBusValid && fBus.telefono.errors?.onlynumber_invalid"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo solo debe contener dígitos</small>
+                <small
+                  *ngIf="formBusValid && fBus.telefono.errors?.telfcel_invalid && fBus.telefono.errors?.onlynumber_invalid==null"
+                  class="invalid-feedback-sunarp p-0 mt-2">El Teléfono solo debe tener entre 7 y 9 dígitos</small>
+              </div>
+            </div>
+            <h5 class="mt-3 text-sunarp-cyan">Datos del Acceso</h5>
+            <div class="row">
+              <div class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">Usuario (Correo Institucional)</label>
+                <input formControlName="usuario" maxlength="250" type="text" class="form-control-sunarp">
+                <small *ngIf="formBusValid && fBus.usuario.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+                <small *ngIf="formBusValid && fBus.usuario.errors?.no_email_usmp"
+                  class="invalid-feedback-sunarp p-0 mt-2">El usuario debe ser el correo institucional</small>
+              </div>
+              <div *ngIf="fBus.rol.value=='1'" class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">Código Alumno</label>
+                <input (input)="convertirEnMayusculas('codigo')" maxlength="20" formControlName="codigo" type="text"
+                  class="form-control-sunarp">
+                <small *ngIf="formBusValid && fBus.codigo.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+                <small *ngIf="formBusValid && fBus.codigo.errors?.onlynumber_invalid"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo solo debe contener dígitos</small>
+                <small
+                  *ngIf="formBusValid && fBus.codigo.errors?.code_invalid_alumno && fBus.codigo.errors?.onlynumber_invalid==null && fBus.codigo.errors?.required==null"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo debe tener 10 dígitos</small>
+              </div>
+            </div>
+            <!---  <div class="row">
+              <div class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">Contraseña</label>
+                <input placeholder="********" formControlName="password" maxlength="16" type="password"
+                  class="form-control-sunarp">
+                <small *ngIf="formBusValid && fBus.password.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+              </div>
+              <div class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">Confirme Contraseña</label>
+                <input placeholder="********" formControlName="confirmPassword" maxlength="16" type="password"
+                  class="form-control-sunarp">
+                <small *ngIf="formBusValid && fBus.confirmPassword.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+              </div>
+            </div>-->
+            <div class="row mt-3">
+              <div class="w-100 text-center">
+                <label class="label-sunarp">Perfil</label>
+                <mat-radio-group (change)="cambioPerfil($event)" formControlName="rol" style="margin-top: 20px;"
+                  class="w-100">
+                  <mat-radio-button class="mr-2" value="1" checked="true">Alumno
+                  </mat-radio-button>
+                  <mat-radio-button value="2">Administrador/Docente
+                  </mat-radio-button>
+                </mat-radio-group>
+                <br><small *ngIf="formBusValid && fBus.rol.errors?.required" class="invalid-feedback-sunarp p-0 mt-2">El
+                  Perfil es requerido</small>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer d-flex justify-content-center">
+      <button *ngIf="tipoAccion==1" (click)="crearUsuario()" type="button" class="btn-sunarp-green"><i
+          class="fa fa-plus icon-sunarp mr-2"></i>Crear Usuario</button>
+      <button *ngIf="tipoAccion==2" (click)="editarArchivo()" type="button" class="btn-sunarp-cyan"><i
+          class="fa fa-plus icon-sunarp mr-2"></i>Modificar Usuario</button>
+      <button (click)="modal_ver_usuario_va.close();" type="button" class="btn-sunarp-red"><i
+          class="fa fa-times icon-sunarp mr-2"></i>Salir</button>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #modal_accion_masiva let-c="close" let-d="dismiss">
+  <div class="modal-content">
+    <div class="modal-header bg-sunarp-gray-dark">
+      <h3 class="modal-title h3-sunarp text-white">EPICSBOT</h3>
+      <button tabindex="-1" type="button" class="close" aria-label="Close"
+        style="overflow:hidden; position: absolute; right: 30px; top: 3px;background-color: transparent;border: 0px;"
+        (click)="modal_accion_masiva_va.close();">
+        <span aria-hidden="true" style="font-size:35px !important;" class="text-white">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body pl-5 pb-4 pr-5 pt-4">
+      <h2 class="title-typ-devo text-center" style="font-size: 35px;">REGISTRO MASIVO DE <span
+          class="text-sunarp-green"> USUARIOS</span>
+      </h2>
+      <div class="row">
+        <div class="col-md-12 col-lg-12">
+          <div class="row text-center">
+            <div class="col-lg-12 col-md-12 mt-2">
+              <span class="text-sunarp-cyan">Esta función debe hacerse obligatoriamente con el siguiente
+                <span (click)="descargarPlantillaUsuarioMasivo()" class="text-sunarp-red"
+                  style="cursor: pointer;font-weight: bold;">FORMATO</span></span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-12 col-md-12 mt-2">
+              <label class="label-sunarp"></label><br>
+              <input [formControl]="archivoAccionMasivaForm" (change)="cambiarArchivoAccionMasiva($event)"
+                accept=".xlsx,.xls" type="file" class="form-control-sunarp">
+            </div>
+            <div *ngIf="false" class="w-100 text-center mt-3">
+              <span>La contraseña por defecto será {{passwordDefault}} para todos los usuarios</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer d-flex justify-content-center">
+      <button (click)="cargaMasiva()" type="button" class="btn-sunarp-green"><i
+          class="fa fa-plus icon-sunarp mr-2"></i>Registrar
+        Usuarios</button>
+      <button (click)="modal_accion_masiva_va.close();" type="button" class="btn-sunarp-red"><i
+          class="fa fa-times icon-sunarp mr-2"></i>Salir</button>
+    </div>
+  </div>
+</ng-template>

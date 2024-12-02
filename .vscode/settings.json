@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/13df2c44-8ab1-4f59-82ef-62bddbfdb49c/resourceGroups/EPICSBOT-USMP_group/providers/Microsoft.Web/sites/EPICSBOT-USMP",
+    "appService.deploySubpath": "dist\\moduloepicsbot"
+}

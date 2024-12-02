@@ -1,0 +1,24 @@
+<nav ngbNav #nav="ngbNav" class="nav-tabs responsive-tabs" [destroyOnHide]="false">
+  <ng-container ngbNavItem>
+    <a class="sub-menu-item" ngbNavLink>Administar Personal</a>
+    <ng-template ngbNavContent>
+      <app-creacion-usuario></app-creacion-usuario>
+    </ng-template>
+  </ng-container>
+  <ng-container ngbNavItem>
+    <a class="sub-menu-item" ngbNavLink>Administrar Clientes</a>
+    <ng-template ngbNavContent>
+    </ng-template>
+  </ng-container>
+  <ng-container ngbNavItem>
+    <a class="sub-menu-item" ngbNavLink>Administrar Servicios</a>
+    <ng-template ngbNavContent>
+    </ng-template>
+  </ng-container>
+  <ng-container ngbNavItem>
+    <a class="sub-menu-item" ngbNavLink>Módulo de Gestión de Clientes</a>
+    <ng-template ngbNavContent>
+    </ng-template>
+  </ng-container>
+</nav>
+<div [ngbNavOutlet]="nav" class="mt-3"></div>

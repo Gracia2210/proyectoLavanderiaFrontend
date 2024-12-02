@@ -1,0 +1,234 @@
+@import '../../../../assets/sass/general.scss';
+
+.container-general {
+  background: url("../../../../assets/img/login/login-background2.svg") center center no-repeat !important;
+  background-size: cover !important;
+}
+
+.button-login {
+  border-radius: 16px;
+}
+
+.half,
+.half .container>.row {
+  height: 100vh;
+}
+
+.half .contents {
+  width: 50%;
+}
+
+.half .bg {
+  width: 50%;
+}
+
+.form-login {
+  width: 400px;
+  .text-indication {
+    background-color: #eeeeee;
+    border-color: #d6d8db;
+    border-radius: 0.25rem;
+    border-radius: 15px;
+    border: 1px solid transparent;
+    color: #2b3e3c;
+    font-family: "AvenirLTStd-Medium";
+    font-size: 16px;
+    padding: 0.75rem 1.25rem;
+    position: relative;
+  }
+  .form-ingresar {
+    text-align: left !important;
+    margin: 2rem 0;
+    .label-sunarp {
+      font-family: 'Gotham-Medium';
+      color: rgb(77, 74, 74);
+      padding: 0 0 0.5rem 0;
+    }
+    .input-login {
+      display: flex;
+      align-items: center;
+      position: relative;
+      width: 100%;
+      height: auto;
+      border-color: none;
+      cursor: pointer;
+
+      mat-icon {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        margin: 0.9rem 0 1rem 0;
+        left: 1rem;
+        background: rgba(255, 255, 255, 0.671);
+        color: rgb(66, 66, 66);
+        font-size: 2.5rem;
+        width: 3.2rem;
+        height: 3.2rem;
+      }
+
+      input {
+        color: rgb(32, 28, 28);
+        font-size: 1.0rem;
+        width: 100%;
+        padding: 1rem 1rem 1rem 5rem;
+        border-radius: 1rem;
+        border: 1.8px solid #e7e7e7;
+      }
+
+      input::placeholder {
+        color: rgb(109, 106, 106);
+      }
+
+    }
+    .visivility {
+      display: flex;
+      align-items: center;
+      position: relative;
+      width: 100%;
+      height: auto;
+      border-color: none;
+      cursor: pointer;
+
+      mat-icon {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        //margin: 0.9rem 0 1rem 0;
+        right: 1rem;
+        top: -3.6rem;
+        //background: rgba(255, 255, 255, 0.671);
+        color: rgb(66, 66, 66);
+        font-size: 2.5rem;
+        width: 3.2rem;
+        height: 3.2rem;
+      }
+    }
+  }
+  .btn-sunarp-cyan{
+    width: 100%;
+    margin-bottom: 1em;
+    padding: 1rem 0 1rem 0;
+    font-size: 18px;
+    border-radius: 1rem;
+    background-color: #58afd4 !important;
+  }
+  .foot-log-deta {
+    text-align: center;
+    a {
+      color: #2b3e3c;
+      font-family: "AvenirLTStd-Medium";
+      font-size: 15px;
+      text-decoration: none;
+    }
+    a:hover {
+      opacity: 0.75;
+    }
+    span {
+      color: #58afd4;
+      font-size: 15px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+  }
+}
+
+.title-general {
+  color: #2b3e3c;
+  font-family: "Gotham-Bold";
+  font-size: 30px;
+}
+.form-login-danger {
+  color: #ef402b;
+  margin-bottom: -15px;
+  margin-left: 10px;
+  margin-top: 8px;
+  text-align: left;
+}
+
+.microsoft-login-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0 1rem 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: $sunarp-red;
+  background-color: transparent;
+  border: 2px solid $sunarp-red;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.microsoft-login-btn .icon {
+  height: 24px;
+  margin-right: 10px;
+}
+
+.microsoft-login-btn:hover {
+  background-color: $sunarp-red;
+  color: white;
+}
+
+.microsoft-login-btn:focus {
+  outline: none;
+}
+
+.linea-roja {
+  width: 100%;
+  height: 2px;
+  background-color: #58afd4;
+  margin: 10px 0;
+}
+
+@media (max-width: 2000px) {
+  .form-login {
+    margin-left: 50px;
+  }
+}
+
+@media (max-width: 1800px) {
+  .form-login {
+    margin-left: 20px;
+  }
+}
+
+@media (max-width: 1450px) {
+  .form-login {
+    margin-left: 0px;
+    width: 350px;
+  }
+
+  .title-general {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 1100px) {
+
+  .half .contents,
+  .half .bg {
+    width: 100%;
+  }
+}
+
+@media (max-width: 992px) {
+  .half .bg {
+    display: none;
+  }
+
+  .form-login {
+    margin-left: -50px;
+    width: 450px;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-login {
+    margin-left: 0px;
+    padding-left: 20px;
+    padding-right: 20px;
+    width: 100%;
+  }
+}

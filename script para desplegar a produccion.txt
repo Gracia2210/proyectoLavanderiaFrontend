@@ -1,0 +1,4 @@
+ng build --configuration production
+gcloud config set project epicsbot-441318
+gcloud run deploy epicsbot-441318
+--30

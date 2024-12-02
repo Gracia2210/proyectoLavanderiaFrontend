@@ -1,0 +1,105 @@
+/***************************************************/
+/*   GENERAL VARIABLES FOR 'DEVOLUCIONES' PROJECT  */
+/***************************************************/
+
+/*
+    Description:
+    -----------
+    Here you will find all the general variables
+    that can be used in the whole styles application
+*/
+
+/*Importing custom fonts*/
+
+@font-face {
+    font-family: "AvenirLTStd-Black";
+    src: url("../fonts/AvenirLTStd-Black.otf");
+}
+@font-face {
+    font-family: "AvenirLTStd-Medium";
+    src: url("../fonts/AvenirLTStd-Medium.otf");
+}
+@font-face {
+    font-family: "AvenirLTStd-Book";
+    src: url("../fonts/AvenirLTStd-Book.otf");
+}
+@font-face {
+    font-family: "Gotham-Ultra";
+    src: url("../fonts/Gotham-Ultra.otf");
+}
+@font-face {
+    font-family: "Gotham-Black";
+    src: url("../fonts/Gotham-Black.otf");
+}
+@font-face {
+    font-family: "Gotham-Black-Regular";
+    src: url("../fonts/Gotham-Black-Regular.ttf");
+}
+@font-face {
+    font-family: "Gotham-Bold";
+    src: url("../fonts/Gotham-Bold.otf");
+}
+@font-face {
+    font-family: "Gotham-Medium";
+    src: url("../fonts/Gotham-Medium.otf");
+}
+@font-face {
+    font-family: "Gotham-Book";
+    src: url("../fonts/Gotham-Book.ttf");
+}
+@font-face {
+    font-family: "MinionPro-Regular";
+    src: url("../fonts/MinionPro-Regular.otf");
+}
+@font-face {
+    font-family: "MyriadPro-Regular";
+    src: url("../fonts/MyriadPro-Regular.otf");
+}
+
+/*****************/
+/*   VARIABLES   */
+/*****************/
+
+/*Variables for custom fonts calls*/
+
+$ff-avenirLTStd-black: 'AvenirLTStd-Black', sans-serif;
+$ff-avenirLTStd-book: 'AvenirLTStd-Book', sans-serif;
+$ff-gotham-ultra: 'Gotham-Ultra', sans-serif;
+$ff-gotham-black: 'Gotham-Black', sans-serif;
+$ff-gotham-black-regular: 'Gotham-Black-Regular', sans-serif;
+$ff-gotham-bold: 'Gotham-Bold', sans-serif;
+$ff-gotham-medium: 'Gotham-Medium', sans-serif;
+$ff-gotham-book: 'Gotham-Book', sans-serif;
+$ff-minionPro-regular: 'MinionPro-Regular', sans-serif;
+$ff-myriadPro-regular: 'MyriadPro-Regular', sans-serif;
+$ff-avenirLTStd-medium: 'AvenirLTStd-Medium', sans-serif;
+
+/*Variables for institutional colors*/
+
+$sunarp-green: #8EC321;
+$sunarp-red: #EB3219;
+$sunarp-cyan: #00A5A5;
+$sunarp-yellow: #FFAF00;
+$sunarp-gray-dark: #323C37;
+$sunarp-gray-light: #d6d6d6;
+$sunarp-white: #ffffff;
+$sunarp-black: #222222;
+
+/*Variables for font sizes*/
+
+$font-size-extra-small: 12px;
+$font-size-small: 14px;
+$font-size-normal: 16px;
+$font-size-medium: 18px;
+$font-size-large: 20px;
+$font-size-mega: 24px;
+$font-size-ultra: 28px;
+
+/*Variables for headers*/
+
+$font-size-h1: 30px;
+$font-size-h2: 26px;
+$font-size-h3: 20px;
+$font-size-h4: 18px;
+$font-size-h5: 16px;
+$font-size-h6: 14px;

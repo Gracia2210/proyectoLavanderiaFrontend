@@ -1,0 +1,22 @@
+
+@import "src/assets/sass/general.scss";
+
+.table-soli-devo {
+  border-radius: .8em;
+  overflow: hidden;
+  thead {
+    background-color: #4b626c;
+    color: $sunarp-white;
+
+    th {
+      font-family: $ff-avenirLTStd-black;
+      height: 20px;
+      vertical-align: middle !important;
+    }
+  }
+}
+.title-typ-devo {
+  font-size: $font-size-ultra;
+  font-family: $ff-gotham-black-regular;
+  color: $sunarp-gray-dark;
+}

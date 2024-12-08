@@ -1,3 +1,54 @@
-<p>
-  personal works!
-</p>
+<h2 class="h2-sunarp text-sunarp-gray-dark text-center mt-4 mb-4">Busqueda de Clientes</h2>
+
+<div class="busqueda-cliente">
+  <div class="row mb-4">
+    <div class="col-md-12 col-lg-12">
+      <form [formGroup]="formBusqueda">
+        <div class="row">
+          <div class="col-lg-3 col-md-12 mt-2">
+            <label class="label-sunarp">Buscar por</label><br>
+            <mat-radio-group formControlName="tipo" class="w-100">
+              <mat-radio-button class="mr-2" value="1">Nombre
+              </mat-radio-button>
+              <mat-radio-button value="2">DNI
+              </mat-radio-button>
+            </mat-radio-group>
+          </div>
+        </div>
+        <div *ngIf="formBusqueda.value.tipo == '1'" class="row">
+          <div class="col-lg-3 col-md-12 mt-2">
+            <label class="label-sunarp">Nombre</label>
+            <input formControlName="nombre" class="form-control-sunarp" type="text">
+          </div>
+          <div class="col-lg-3 col-md-12 mt-2">
+            <label class="label-sunarp">Paterno</label>
+            <input formControlName="paterno" class="form-control-sunarp" type="text">
+          </div>
+          <div class="col-lg-3 col-md-12 mt-2">
+            <label class="label-sunarp">Materno</label>
+            <input formControlName="materno" class="form-control-sunarp" type="text">
+          </div>
+          <div class="col-lg-3 col-md-12 mt-2">
+            <button style="margin-top: 23px;" type="button" class="btn-sunarp-cyan btn-reload-tabla mr-2"><i
+                class="fa fa-search icon-sunarp"></i>Buscar</button>
+          </div>
+        </div>
+        <div *ngIf="formBusqueda.value.tipo == '2'" class="row">
+          <div class="col-lg-4 col-md-12 mt-2">
+            <label class="label-sunarp">DNI</label>
+            <input formControlName="dni" class="form-control-sunarp" type="text">
+          </div>
+          <div class="col-lg-3 col-md-12 mt-2">
+            <button style="margin-top: 23px;" type="button" class="btn-sunarp-cyan btn-reload-tabla mr-2"><i
+                class="fa fa-search icon-sunarp"></i>Buscar</button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+  <div>
+    <div class="h6-sunarp">¿No existe el cliente? <span class="text-sunarp-cyan" style="cursor: pointer;">Registralo</span></div>
+  </div>
+
+</div>

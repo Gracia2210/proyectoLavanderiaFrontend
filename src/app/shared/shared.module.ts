@@ -11,7 +11,6 @@ import {MatIconModule} from '@angular/material/icon';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { HighchartsChartModule } from 'highcharts-angular';
-import { NgxMicRecorderModule } from 'ngx-mic-recorder';
 
 @NgModule({
   declarations: [],
@@ -29,7 +28,6 @@ import { NgxMicRecorderModule } from 'ngx-mic-recorder';
     NgxExtendedPdfViewerModule,
     NgSelectModule,
     HighchartsChartModule,
-    NgxMicRecorderModule
   ],
   exports:[
     FormsModule,
@@ -45,8 +43,7 @@ import { NgxMicRecorderModule } from 'ngx-mic-recorder';
     MatIconModule,
     NgxExtendedPdfViewerModule,
     NgSelectModule,
-    HighchartsChartModule,
-    NgxMicRecorderModule
+    HighchartsChartModule
   ]
 })
 export class SharedModule { }

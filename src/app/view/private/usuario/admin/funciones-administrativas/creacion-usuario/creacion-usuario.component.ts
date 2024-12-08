@@ -64,17 +64,15 @@ export class CreacionUsuarioComponent {
   listaCarrera: CodNombre<string>[] = [];
 
   formUsuario = new FormGroup({
-    usuario: new FormControl("", [Validators.required, this.customvalidator.validateEmailUSMP]),
+    usuario: new FormControl("", [Validators.required,this.customvalidator.ValidateOnlyNumber, this.customvalidator.ValidateLibElecLenght]),
     password: new FormControl(""),
     confirmPassword: new FormControl(""),
     apellidoPaterno: new FormControl("", [Validators.required, this.customvalidator.ValidateOnlyLetter]),
     apellidoMaterno: new FormControl("", [Validators.required, this.customvalidator.ValidateOnlyLetter]),
     nombre: new FormControl("", [Validators.required, this.customvalidator.ValidateOnlyLetter]),
     sexo: new FormControl("", [Validators.required]),
-    codigo: new FormControl("", [Validators.required, this.customvalidator.ValidateOnlyNumber, this.customvalidator.validateCodeAlumno]),
-    email: new FormControl("",/*[Validators.required,Validators.email]*/),
+    email: new FormControl("",[Validators.required,Validators.email]),
     telefono: new FormControl("", [Validators.required, this.customvalidator.ValidateTelfCelLenght, this.customvalidator.ValidateOnlyNumber]),
-    idCarrera: new FormControl("", [Validators.required]),
     rol: new FormControl("", [Validators.required])
   });
   get fBus() {
@@ -110,7 +108,7 @@ export class CreacionUsuarioComponent {
           { data: 'apellido_materno' },
           { data: 'sexo' },
           { data: 'telefono' },
-          { data: 'carrera' },
+          { data: 'email' },
           {
             data: 'usuario', render: (data: any, type: any, full: any) => {
               return '<div class="btn-group"><button type="button" style ="margin-right:5px;" class="btn-sunarp-cyan edit_usu mr-3"><i class="fa fa-pencil" aria-hidden="true"></i></button><button type="button" class="btn-sunarp-red eliminar_usu mr-3"><i class="fa fa-trash" aria-hidden="true"></i></button></div';
@@ -133,7 +131,6 @@ export class CreacionUsuarioComponent {
         }
       }
     });
-    this.adminService.listaCarrera().subscribe(listaCarrera => this.listaCarrera = listaCarrera);
   }
 
 
@@ -191,17 +188,19 @@ export class CreacionUsuarioComponent {
       apellidoMaterno: "",
       nombre: "",
       sexo: "",
-      codigo: "",
       email: "",
       telefono: "",
-      idCarrera: "",
       rol: "1"
     });
 
-    if (tipoAccion === 1) {
-      limpiarFormcontrol(this.formUsuario.get("codigo"), [Validators.required, this.customvalidator.ValidateOnlyNumber, this.customvalidator.validateCodeAlumno]);
+    if (this.tipoAccion == 1) {
+      limpiarFormcontrol(this.formUsuario.get("password"), [Validators.required]);
+      limpiarFormcontrol(this.formUsuario.get("confirmPassword"), [Validators.required]);
     }
-
+    else {
+      limpiarFormcontrol(this.formUsuario.get("password"), []);
+      limpiarFormcontrol(this.formUsuario.get("confirmPassword"), []);
+    }
     this.abrirModal();
   }
   recargarTabla() {
@@ -251,7 +250,6 @@ export class CreacionUsuarioComponent {
         (formValues as any).roles = perfilArray;
         delete formValues.confirmPassword;
         delete formValues.rol;
-
         this.spinner.show();
         this.adminService.crearUsuario(formValues).subscribe(resp => {
           if (resp.cod === 1) {
@@ -279,18 +277,10 @@ export class CreacionUsuarioComponent {
           apellidoMaterno: this.usuarioModel.apellido_materno,
           nombre: this.usuarioModel.nombre,
           sexo: this.usuarioModel.sexo,
-          codigo: this.usuarioModel.codigo,
           email: this.usuarioModel.email,
           telefono: this.usuarioModel.telefono,
-          idCarrera: this.usuarioModel.id_Carrera,
           rol: String(this.usuarioModel.roles[0].id)
         });
-        if (this.usuarioModel.roles[0].id == 1) {
-          limpiarFormcontrol(this.formUsuario.get("codigo"), [Validators.required]);
-        }
-        else {
-          limpiarFormcontrol(this.formUsuario.get("codigo"), []);
-        }
       }
       else {
         alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
@@ -368,17 +358,6 @@ export class CreacionUsuarioComponent {
       }
     });
   }
-
-  cambioPerfil(event: MatRadioChange) {
-    this.fBus.codigo.setValue("");
-    if (event.value == 1) {
-      limpiarFormcontrol(this.formUsuario.get("codigo"), [Validators.required, this.customvalidator.ValidateOnlyNumber, this.customvalidator.validateCodeAlumno]);
-    }
-    else {
-      limpiarFormcontrol(this.formUsuario.get("codigo"), []);
-    }
-  }
-
   accionMasivaModal() {
     this.archivoAccionMasiva = null;
     this.archivoAccionMasivaForm.setValue(null);
@@ -532,7 +511,7 @@ export class CreacionUsuarioComponent {
       if (cantidadRequest > 0) {
         let textTitulo: string = cantidadRequest == 1 ? "al usuario" : " a los " + cantidadRequest + " usuarios";
         Swal.fire({
-          title: "¿Desea registrar " + textTitulo + " en el Sistema de EpicsBot?",
+          title: "¿Desea registrar " + textTitulo + " en el Sistema?",
           text: "Por favor verificar la información",
           icon: 'warning',
           showCancelButton: true,

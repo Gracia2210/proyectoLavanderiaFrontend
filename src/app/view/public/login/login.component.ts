@@ -47,8 +47,7 @@ export class LoginComponent {
       (response) => {
         this._authService.saveToken(response.access_token);
         this._authService.saveUser(response.access_token);
-        //this.router.navigate([this._authService.obtenerRol() === "ROLE_USER" ? "/usuario" : "/usuario/admin/funciones"])
-        this.router.navigate([this._authService.obtenerRol() === "ROLE_USER" ? "/usuario" : "/usuario/admin/funciones"])
+        this.router.navigate([this._authService.obtenerRol() === "ROLE_PERSONAL" ? "/usuario/personal" : "/usuario/admin/funciones"])
         .then(() => {
           window.location.reload();
         });
@@ -82,7 +81,7 @@ export class LoginComponent {
           Swal.fire({ icon: icon_error as SweetAlertIcon, title: icon_error_des_title, text: icon_error_des });
         }
         else {
-          Swal.fire({ icon: "error", title: "Se ha producido un error al intentar ingresar al módulo(Esto puede ser debido por una desconexion a la base de datos o algun error en el programa)", text: "Intente nuevamente,si persiste por favor comunicarse con Mesa de Ayuda o personal de soporte del Módulo de Mantenimiento de Secciones Registrales" });
+          Swal.fire({ icon: "error", title: "Se ha producido un error al intentar ingresar al módulo(Esto puede ser debido por una desconexion a la base de datos o algun error en el programa)", text: "Intente nuevamente,si persiste por favor comunicarse con soporte del sistema" });
         }
         this.spinner.hide();
 

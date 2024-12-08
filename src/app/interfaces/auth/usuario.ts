@@ -4,8 +4,6 @@ export class Usuario {
   paterno: string;
   materno: string;
   sexo: string;
-  codigo: string;
-  carrera: string;
   email: string;
   telefono: string;
   username: string;

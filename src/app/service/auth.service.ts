@@ -23,10 +23,10 @@ export class AuthService {
       return this._usuario;
     } else if (
       this._usuario == null &&
-      localStorage.getItem("us_Bot") != null
+      localStorage.getItem("us_Lavanderia") != null
     ) {
       this._usuario = JSON.parse(
-        localStorage.getItem("us_Bot")
+        localStorage.getItem("us_Lavanderia")
       ) as Usuario;
       return this._usuario;
     }
@@ -50,7 +50,7 @@ export class AuthService {
   }
 
   saveToken(accesstoken: string): void {
-    localStorage.setItem("tokenBots", accesstoken);
+    localStorage.setItem("tokenLavanderia", accesstoken);
   }
   saveUser(accesstoken: string): void {
     let payload = this.decodeAccessToken(accesstoken);
@@ -60,14 +60,12 @@ export class AuthService {
     this._usuario.paterno = payload.apellido_paterno;
     this._usuario.materno = payload.apellido_materno;
     this._usuario.sexo = payload.sexo;
-    this._usuario.codigo = payload.codigo;
-    this._usuario.carrera = payload.carrera;
     this._usuario.email = payload.email;
     this._usuario.telefono = payload.telefono;
     this._usuario.username = payload.user_name;
     this._usuario.roles = payload.authorities;
     this._usuario.idPersona=payload.idPersona;
-    localStorage.setItem("us_Bot", JSON.stringify(this._usuario));
+    localStorage.setItem("us_Lavanderia", JSON.stringify(this._usuario));
   }
 
   decodeAccessToken(accesstoken: string): any {
@@ -77,12 +75,12 @@ export class AuthService {
     return null;
   }
   token(): string {
-    return localStorage.getItem("tokenBots");
+    return localStorage.getItem("tokenLavanderia");
   }
 
   logout() {
-    localStorage.removeItem("tokenBots");
-    localStorage.removeItem("us_Bot");
+    localStorage.removeItem("tokenLavanderia");
+    localStorage.removeItem("us_Lavanderia");
   }
 
 
@@ -102,10 +100,8 @@ export class AuthService {
   }
   convertirRol(rol: string): string {
     switch (rol) {
-      case 'ROLE_USER':
-        return 'ALUMNO';
-      case 'ROLE_DOCENTE':
-        return 'DOCENTE';
+      case 'ROLE_PERSONAL':
+        return 'PERSONAL';
       case 'ROLE_ADMIN':
         return 'ADMINISTRADOR';
       default:

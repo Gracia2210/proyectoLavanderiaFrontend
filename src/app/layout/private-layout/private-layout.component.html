@@ -32,16 +32,20 @@
             <img *ngSwitchCase="'F'" src="assets/img/sistema/mujer.jpg" class="img-radius" alt="sunarp">
             <img *ngSwitchDefault src="assets/img/sistema/hombre.jpg" class="img-radius" alt="sunarp">
           </div>
-          <div *ngIf="usuario?.codigo" class="mt-2">
-            <h5 class="text-white mt-2 h5-sunarp">CÓDIGO DE ALUMNO: {{usuario?.codigo}}</h5>
+          <div class="mt-2">
+            <h5 class="text-white mt-2 h5-sunarp">DNI : {{usuario.username}}</h5>
           </div>
-          <h6 class="text-email-principal mt-3 mb-2">Correo Electrónico : {{usuario?.username}}</h6>
+
+          <h6 class="text-email-principal mt-3 mb-2">Correo Electrónico : {{usuario?.email}}</h6>
+          <h6 class="text-email-principal mt-3 mb-2">Teléfono : {{usuario?.telefono}}</h6>
+
 
           <ul style="text-align: left;" class="nav-news-feed">
-            <li (click)="verChatBot()"  *ngIf="verPermisos()=='ROLE_USER'"><i class="far fa-comment-dots icon1"></i>
+            <li (click)="verChatBot()" *ngIf="verPermisos()=='ROLE_USER'"><i class="far fa-comment-dots icon1"></i>
               <div><a href="javascript:void(0);">Chatbot</a></div>
             </li>
-            <li (click)="verFuncionesAdministrativas()" *ngIf="verPermisos()=='ROLE_DOCENTE'" ><i class="fa fa-user icon4"></i>
+            <li (click)="verFuncionesAdministrativas()" *ngIf="verPermisos()=='ROLE_DOCENTE'"><i
+                class="fa fa-user icon4"></i>
               <div><a href="javascript:void(0);">Opciones Administrativas</a>
               </div>
             </li>

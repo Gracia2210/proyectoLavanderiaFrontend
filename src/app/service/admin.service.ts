@@ -68,11 +68,6 @@ export class AdminService {
     params = params.append('idArchivo', idArchivo);
     return this.http.get<any>(this.baseEndpoint + '/obtenerDocumento', { params: params })
   }
-
-  listaCarrera(): Observable<any> {
-    return this.http.get<any>(this.baseEndpoint + '/listaCarrera')
-  }
-
   crearUsuariosMasivo(data: any): Observable<any> {
     return this.http.post<any>(this.baseEndpoint + '/crearUsuariosMasivo', JSON.stringify(data))
   }

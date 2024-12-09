@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "allowedCommonJsDependencies":[
+            "allowedCommonJsDependencies": [
               "sweetalert2",
               "moment"
             ],
@@ -43,7 +43,7 @@
               "./node_modules/sweetalert2/dist/sweetalert2.min.css",
               "./node_modules/datatables.net-bs5/css/dataTables.bootstrap5.min.css",
               "src/assets/fonts/themify-icons/themify-icons.css",
-              "./node_modules/ngx-spinner/animations/ball-scale-multiple.css" ,
+              "./node_modules/ngx-spinner/animations/ball-scale-multiple.css",
               "./node_modules/ngx-spinner/animations/ball-pulse-sync.css",
               "./node_modules/@ng-select/ng-select/themes/default.theme.css",
               "src/assets/sass/theme.scss",
@@ -91,6 +91,20 @@
                   "with": "src/environments/environment.dev.ts"
                 }
               ]
+            },
+            "multidevice": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.multidevice.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -103,6 +117,9 @@
             },
             "development": {
               "browserTarget": "moduloepicsbot:build:development"
+            },
+            "multidevice": {
+              "browserTarget": "moduloepicsbot:build:multidevice"
             }
           },
           "defaultConfiguration": "development"
@@ -136,7 +153,7 @@
               "./node_modules/sweetalert2/dist/sweetalert2.min.css",
               "./node_modules/datatables.net-bs5/css/dataTables.bootstrap5.min.css",
               "src/assets/fonts/themify-icons/themify-icons.css",
-              "./node_modules/ngx-spinner/animations/ball-scale-multiple.css" ,
+              "./node_modules/ngx-spinner/animations/ball-scale-multiple.css",
               "./node_modules/ngx-spinner/animations/ball-pulse-sync.css",
               "./node_modules/@ng-select/ng-select/themes/default.theme.css",
               "src/assets/sass/theme.scss",

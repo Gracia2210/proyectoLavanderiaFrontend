@@ -1,0 +1,172 @@
+<h3 class="mt-4 mb-4 h3-sunarp">Administrar Servicios en el Sistema</h3>
+<div class="w-100 mt-4">
+  <button (click)="listarServicios()" style="margin-right: 20px;" type="button" class="btn-sunarp-green"><i
+      class="fa fa-refresh icon-sunarp"></i>Recargar</button>
+  <button (click)="abrirModalCreacionServicio()" style="margin-right: 20px;" type="button" class="btn-sunarp-cyan"><i
+      class="fa fa-plus icon-sunarp"></i>Registrar</button>
+</div>
+
+<div class="row">
+  <div class="col-lg-6 col-md-12 mt-2">
+    <div class="mt-4">
+      <div class="table-responsive">
+        <table datatable class="table thead-sunarp" datatable [dtOptions]="datatable_servicios"
+          [dtTrigger]="datatable_dtTrigger_servicios">
+          <thead>
+            <tr>
+              <th style="width: 30px" class="text-center">N°</th>
+              <th class="text-center">Descripción</th>
+              <th class="text-center">Opciones</th>
+            </tr>
+          </thead>
+          <tbody>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6 col-md-12 mt-2">
+    <div *ngIf="servicioModel==null" class="no-seleccionado-servicio">
+      <b>No ha seleccionado un servicio</b>
+    </div>
+    <form *ngIf="servicioModel!=null" [formGroup]="formServiciosEdit">
+      <h5>Servicio</h5>
+      <div class="row">
+        <div class="col-md-12 col-lg-12">
+          <div class="row">
+            <div class="col-lg-12 col-md-12 mt-2">
+              <label class="label-sunarp">Descripción</label>
+              <input formControlName="descripcion" maxlength="250" type="text" class="form-control-sunarp">
+              <small *ngIf="formServicioEditValid && fBusServEdit.descripcion.errors?.required"
+                class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+              <small *ngIf="formServicioEditValid && fBusServEdit.descripcion.errors?.onlyletter_invalid"
+                class="invalid-feedback-sunarp p-0 mt-2">Este campo solo deben ser letras</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+    <div *ngIf="servicioModel!=null" class="w-100 mt-2 text-center">
+      <button (click)="editarServicioGuardar()" type="button" class="btn-sunarp-yellow"><i
+        class="fa fa-save icon-sunarp"></i>Guardar</button>
+    </div>
+    <div *ngIf="servicioModel!=null" class="w-100 mt-4">
+      <button (click)="listarSubservicio()" style="margin-right: 20px;" type="button" class="btn-sunarp-green"><i
+          class="fa fa-refresh icon-sunarp"></i>Recargar</button>
+      <button (click)="accionTipoSubservicio(1)" style="margin-right: 20px;" type="button" class="btn-sunarp-cyan"><i
+          class="fa fa-plus icon-sunarp"></i>Registrar</button>
+    </div>
+    <div [hidden]="servicioModel == null" class="mt-4">
+      <div class="table-responsive">
+        <table datatable class="table thead-sunarp" datatable [dtOptions]="datatable_subservicio"
+          [dtTrigger]="datatable_dtTrigger_subservicio">
+          <thead>
+            <tr>
+              <th style="width: 30px" class="text-center">N°</th>
+              <th class="text-center">Descripción</th>
+              <th class="text-center">Monto</th>
+              <th class="text-center">Opciones</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<ng-template #modal_servicio let-c="close" let-d="dismiss">
+  <div class="modal-content">
+    <div class="modal-header bg-sunarp-gray-dark">
+      <h3 class="modal-title h3-sunarp text-white">SERVICIO</h3>
+      <button tabindex="-1" type="button" class="close" aria-label="Close"
+        style="overflow:hidden; position: absolute; right: 30px; top: 1px;background-color: transparent;border: 0px;"
+        (click)="modal_servicio_va.close();">
+        <span aria-hidden="true" style="font-size:35px !important;" class="text-white">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body pl-5 pb-4 pr-5 pt-4">
+      <h2 class="title-typ-devo text-center" style="font-size: 25px;">REGISTRAR <span class="text-sunarp-cyan">
+          SERVICIO</span>
+      </h2>
+      <form [formGroup]="formServicios">
+        <div class="row">
+          <div class="col-md-12 col-lg-12">
+            <div class="row">
+              <div class="col-lg-12 col-md-12 mt-2">
+                <label class="label-sunarp">Descripción</label>
+                <input formControlName="descripcion" maxlength="250" type="text" class="form-control-sunarp">
+                <small *ngIf="formServicioValid && fBusServ.descripcion.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+                <small *ngIf="formServicioValid && fBusServ.descripcion.errors?.onlyletter_invalid"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo solo deben ser letras</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer d-flex justify-content-center">
+      <button (click)="registrarServicio()" type="button" class="btn-sunarp-cyan"><i
+          class="fa fa-plus icon-sunarp mr-2"></i>Registrar Servicio</button>
+      <button (click)="modal_servicio_va.close();" type="button" class="btn-sunarp-red"><i
+          class="fa fa-times icon-sunarp mr-2"></i>Salir</button>
+    </div>
+  </div>
+</ng-template>
+
+
+
+<ng-template #modal_subservicio let-c="close" let-d="dismiss">
+  <div class="modal-content">
+    <div class="modal-header bg-sunarp-gray-dark">
+      <h3 class="modal-title h3-sunarp text-white">SUBSERVICIO</h3>
+      <button tabindex="-1" type="button" class="close" aria-label="Close"
+        style="overflow:hidden; position: absolute; right: 30px; top: 1px;background-color: transparent;border: 0px;"
+        (click)="modal_subservicio_va.close();">
+        <span aria-hidden="true" style="font-size:35px !important;" class="text-white">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body pl-5 pb-4 pr-5 pt-4">
+      <h2 class="title-typ-devo text-center" style="font-size: 25px;">REGISTRAR <span class="text-sunarp-cyan">
+          SUBSERVICIO</span>
+      </h2>
+      <form [formGroup]="formSubServicios">
+        <div class="row">
+          <div class="col-md-12 col-lg-12">
+            <div class="row">
+              <div class="col-lg-12 col-md-12 mt-2">
+                <label class="label-sunarp">Descripción</label>
+                <input formControlName="descripcion" maxlength="250" type="text" class="form-control-sunarp">
+                <small *ngIf="formSubValid && fBusSub.descripcion.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+                <small *ngIf="formSubValid && fBusSub.descripcion.errors?.onlyletter_invalid"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo solo deben ser letras</small>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-12 col-md-12 mt-2">
+                <label class="label-sunarp">Monto</label>
+                <input  digitOnly
+                [decimal]="true" [decimalSeparator]="'.'" formControlName="monto" type="text" class="form-control-sunarp"  (blur)="formatearMonto('monto')">
+                <small *ngIf="formSubValid && fBusSub.monto.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer d-flex justify-content-center">
+      <button *ngIf="tipoAccionSubservicio==1" (click)="registrarSubservicio()" type="button" class="btn-sunarp-cyan"><i
+          class="fa fa-plus icon-sunarp mr-2"></i>Registrar Subservicio</button>
+      <button *ngIf="tipoAccionSubservicio==2" (click)="editarSubservicio()" type="button" class="btn-sunarp-cyan"><i
+            class="fa fa-pencil icon-sunarp mr-2"></i>Modificar Subservicio</button>
+      <button (click)="modal_subservicio_va.close();" type="button" class="btn-sunarp-red"><i
+          class="fa fa-times icon-sunarp mr-2"></i>Salir</button>
+    </div>
+  </div>
+</ng-template>

@@ -11,9 +11,12 @@ import {MatIconModule} from '@angular/material/icon';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { HighchartsChartModule } from 'highcharts-angular';
+import { ValorMonetarioPipe } from '../util/pipes/valor-monetario.pipe';
+import { DigitOnlyModule } from './directives/digit-only.module';
+import { DecimalFormatPipe } from '../util/pipes/decimal-format.pipe';
 
 @NgModule({
-  declarations: [],
+  declarations: [ValorMonetarioPipe,DecimalFormatPipe],
   imports: [
     FormsModule,
     ReactiveFormsModule,
@@ -28,9 +31,12 @@ import { HighchartsChartModule } from 'highcharts-angular';
     NgxExtendedPdfViewerModule,
     NgSelectModule,
     HighchartsChartModule,
+    DigitOnlyModule
   ],
   exports:[
     FormsModule,
+    ValorMonetarioPipe,
+    DecimalFormatPipe,
     ReactiveFormsModule,
     DataTablesModule,
     MatCheckboxModule,
@@ -43,7 +49,8 @@ import { HighchartsChartModule } from 'highcharts-angular';
     MatIconModule,
     NgxExtendedPdfViewerModule,
     NgSelectModule,
-    HighchartsChartModule
+    HighchartsChartModule,
+    DigitOnlyModule
   ]
 })
 export class SharedModule { }

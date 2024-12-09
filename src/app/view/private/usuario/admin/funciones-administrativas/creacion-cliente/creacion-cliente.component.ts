@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewChildren } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewChildren, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbModal, NgbModalOptions, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { DataTableDirective } from 'angular-datatables';
@@ -13,7 +13,8 @@ import Swal from 'sweetalert2';
 @Component({
   selector: 'app-creacion-cliente',
   templateUrl: './creacion-cliente.component.html',
-  styleUrls: ['./creacion-cliente.component.scss']
+  styleUrls: ['./creacion-cliente.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class CreacionClienteComponent implements OnInit {
 

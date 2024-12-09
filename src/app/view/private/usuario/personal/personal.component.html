@@ -1,9 +1,10 @@
-<h2 class="h2-sunarp text-sunarp-gray-dark text-center mt-4 mb-4">Busqueda de Clientes</h2>
 
-<div class="busqueda-cliente">
+
+<div [hidden]="clienteModel!=null" class="busqueda-cliente">
+  <h2 class="h2-sunarp text-sunarp-gray-dark text-center mt-4 mb-4">Busqueda de Clientes</h2>
   <div class="row mb-4">
     <div class="col-md-12 col-lg-12">
-      <form [formGroup]="formBusqueda">
+      <form [formGroup]="formBusqueda" (ngSubmit)="buscarClientes()">
         <div class="row">
           <div class="col-lg-3 col-md-12 mt-2">
             <label class="label-sunarp">Buscar por</label><br>
@@ -18,18 +19,27 @@
         <div *ngIf="formBusqueda.value.tipo == '1'" class="row">
           <div class="col-lg-3 col-md-12 mt-2">
             <label class="label-sunarp">Nombre</label>
-            <input formControlName="nombre" class="form-control-sunarp" type="text">
+            <input (input)="convertirEnMayusculas('nombre',this.formBusqueda)" formControlName="nombre" class="form-control-sunarp"
+              type="text">
+            <small *ngIf="fBusValid && fbus.nombre.errors?.onlyletter_invalid"
+              class="invalid-feedback-sunarp p-0 mt-2">Este campo solo deben ser letras</small>
           </div>
           <div class="col-lg-3 col-md-12 mt-2">
             <label class="label-sunarp">Paterno</label>
-            <input formControlName="paterno" class="form-control-sunarp" type="text">
+            <input (input)="convertirEnMayusculas('paterno',this.formBusqueda)" formControlName="paterno" class="form-control-sunarp"
+              type="text">
+            <small *ngIf="fBusValid && fbus.paterno.errors?.onlyletter_invalid"
+              class="invalid-feedback-sunarp p-0 mt-2">Este campo solo deben ser letras</small>
           </div>
           <div class="col-lg-3 col-md-12 mt-2">
             <label class="label-sunarp">Materno</label>
-            <input formControlName="materno" class="form-control-sunarp" type="text">
+            <input (input)="convertirEnMayusculas('materno',this.formBusqueda)" formControlName="materno" class="form-control-sunarp"
+              type="text">
+            <small *ngIf="fBusValid && fbus.materno.errors?.onlyletter_invalid"
+              class="invalid-feedback-sunarp p-0 mt-2">Este campo solo deben ser letras</small>
           </div>
           <div class="col-lg-3 col-md-12 mt-2">
-            <button style="margin-top: 23px;" type="button" class="btn-sunarp-cyan btn-reload-tabla mr-2"><i
+            <button style="margin-top: 23px;" type="submit" class="btn-sunarp-cyan btn-reload-tabla mr-2"><i
                 class="fa fa-search icon-sunarp"></i>Buscar</button>
           </div>
         </div>
@@ -37,9 +47,13 @@
           <div class="col-lg-4 col-md-12 mt-2">
             <label class="label-sunarp">DNI</label>
             <input formControlName="dni" class="form-control-sunarp" type="text">
+            <small *ngIf="fBusValid && fbus.dni.errors?.onlynumber_invalid" class="invalid-feedback-sunarp p-0 mt-2">El
+              DNI deben ser solo dígitos</small>
+            <small *ngIf="fBusValid && fbus.dni.errors?.dni_invalid && fbus.dni.errors?.onlynumber_invalid==null"
+              class="invalid-feedback-sunarp p-0 mt-2">El DNI debe tener solo 8 dígitos</small>
           </div>
           <div class="col-lg-3 col-md-12 mt-2">
-            <button style="margin-top: 23px;" type="button" class="btn-sunarp-cyan btn-reload-tabla mr-2"><i
+            <button style="margin-top: 23px;" type="submit" class="btn-sunarp-cyan btn-reload-tabla mr-2"><i
                 class="fa fa-search icon-sunarp"></i>Buscar</button>
           </div>
         </div>
@@ -48,7 +62,130 @@
     </div>
   </div>
   <div>
-    <div class="h6-sunarp">¿No existe el cliente? <span class="text-sunarp-cyan" style="cursor: pointer;">Registralo</span></div>
+    <div class="h6-sunarp">¿No existe el cliente? <span (click)="abrirModalCliente()" class="text-sunarp-cyan"
+        style="cursor: pointer;">Registralo</span></div>
   </div>
+  <div [hidden]="listaCliente.length == 0" class="mt-4">
+    <div class="table-responsive">
+      <table datatable class="table thead-sunarp" datatable [dtOptions]="datatable_cliente"
+        [dtTrigger]="datatable_dtTrigger_cliente">
+        <thead>
+          <tr>
+            <th style="width: 30px" class="text-center">N°</th>
+            <th class="text-center">DNI</th>
+            <th class="text-center">Nombre</th>
+            <th class="text-center">Paterno</th>
+            <th class="text-center">Materno</th>
+            <th class="text-center">Teléfono</th>
+            <th class="text-center">Email</th>
+            <th class="text-center">Opciones</th>
+          </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+<ng-template #modal_ver_cliente let-c="close" let-d="dismiss">
+  <div class="modal-content">
+    <div class="modal-header bg-sunarp-gray-dark">
+      <h3 class="modal-title h3-sunarp text-white">CLIENTE</h3>
+      <button tabindex="-1" type="button" class="close" aria-label="Close"
+        style="overflow:hidden; position: absolute; right: 30px; top: 1px;background-color: transparent;border: 0px;"
+        (click)="modal_ver_cliente_va.close();">
+        <span aria-hidden="true" style="font-size:35px !important;" class="text-white">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body pl-5 pb-4 pr-5 pt-4">
+      <h2 class="title-typ-devo text-center" style="font-size: 35px;">REGISTRAR<span
+          class="text-sunarp-cyan"> CLIENTE</span>
+      </h2>
+      <form [formGroup]="formCliente">
+        <div class="row">
+          <div class="col-md-12 col-lg-12">
+            <div class="row">
+              <div class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">DNI</label>
+                <input formControlName="docIden" maxlength="250" type="text" class="form-control-sunarp">
+                <small *ngIf="formBusValid && fBus.docIden.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+                  <small
+                  *ngIf="formBusValid && fBus.docIden.errors?.onlynumber_invalid"
+                  class="invalid-feedback-sunarp p-0 mt-2">El DNI deben ser solo dígitos</small>
+                <small *ngIf="formBusValid && fBus.docIden.errors?.dni_invalid && fBus.docIden.errors?.onlynumber_invalid==null"
+                  class="invalid-feedback-sunarp p-0 mt-2">El DNI debe tener solo 8 dígitos</small>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">Nombre</label>
+                <input (input)="convertirEnMayusculas('nombre',this.formCliente)" formControlName="nombre" maxlength="250" type="text"
+                  class="form-control-sunarp">
+                <small *ngIf="formBusValid && fBus.nombre.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+                <small *ngIf="formBusValid && fBus.nombre.errors?.onlyletter_invalid"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo solo deben ser letras</small>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">Paterno</label>
+                <input (input)="convertirEnMayusculas('apellidoPaterno',this.formCliente)" formControlName="apellidoPaterno"
+                  maxlength="250" type="text" class="form-control-sunarp">
+                <small *ngIf="formBusValid && fBus.apellidoPaterno.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+                <small *ngIf="formBusValid && fBus.apellidoPaterno.errors?.onlyletter_invalid"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo solo deben ser letras</small>
+              </div>
+              <div class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">Materno</label>
+                <input (input)="convertirEnMayusculas('apellidoMaterno',this.formCliente)" formControlName="apellidoMaterno"
+                  maxlength="250" type="text" class="form-control-sunarp">
+                <small *ngIf="formBusValid && fBus.apellidoMaterno.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+                <small *ngIf="formBusValid && fBus.apellidoMaterno.errors?.onlyletter_invalid"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo solo deben ser letras</small>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">Teléfono</label>
+                <input formControlName="telefono" maxlength="250" type="text" class="form-control-sunarp">
+                <small *ngIf="formBusValid && fBus.telefono.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+                <small *ngIf="formBusValid && fBus.telefono.errors?.onlynumber_invalid"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo solo debe contener dígitos</small>
+                <small
+                  *ngIf="formBusValid && fBus.telefono.errors?.telfcel_invalid && fBus.telefono.errors?.onlynumber_invalid==null"
+                  class="invalid-feedback-sunarp p-0 mt-2">El Teléfono solo debe tener entre 7 y 9 dígitos</small>
+              </div>
+              <div class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">Correo Electrónico</label>
+                <input (input)="convertirEnMinusculas('email')" formControlName="email" maxlength="250" type="text"
+                  class="form-control-sunarp">
+                <small *ngIf="formBusValid && fBus.email.errors?.email" class="invalid-feedback-sunarp p-0 mt-2">El
+                  Correo es inválido</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer d-flex justify-content-center">
+      <button  (click)="crearCliente()" type="button" class="btn-sunarp-cyan"><i
+          class="fa fa-plus icon-sunarp mr-2"></i>Registrar Cliente</button>
+      <button (click)="modal_ver_cliente_va.close();" type="button" class="btn-sunarp-red"><i
+          class="fa fa-times icon-sunarp mr-2"></i>Salir</button>
+    </div>
+  </div>
+</ng-template>
+
+<h2 *ngIf="clienteModel!=null" class="h2-sunarp text-sunarp-gray-dark text-center mt-4 mb-4">{{'Pagos Pendientes de '+clienteModel.nombre+' '+clienteModel.apellidoPaterno+' '+clienteModel.apellidoMaterno}}</h2>
+<div [hidden]="clienteModel==null" class="lista-pagos">
+  <button (click)="retornarBusquedaCliente()" type="button" class="btn-sunarp-red "><i class="fa fa-arrow-left icon-sunarp mr-2"></i>Regresar</button>
+
 
 </div>

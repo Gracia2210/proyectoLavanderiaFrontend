@@ -42,11 +42,11 @@
             "styles": [
               "./node_modules/sweetalert2/dist/sweetalert2.min.css",
               "./node_modules/datatables.net-bs5/css/dataTables.bootstrap5.min.css",
-              "src/assets/sass/theme.scss",
               "src/assets/fonts/themify-icons/themify-icons.css",
               "./node_modules/ngx-spinner/animations/ball-scale-multiple.css" ,
               "./node_modules/ngx-spinner/animations/ball-pulse-sync.css",
               "./node_modules/@ng-select/ng-select/themes/default.theme.css",
+              "src/assets/sass/theme.scss",
               "src/styles.scss"
             ],
             "scripts": [
@@ -135,11 +135,11 @@
             "styles": [
               "./node_modules/sweetalert2/dist/sweetalert2.min.css",
               "./node_modules/datatables.net-bs5/css/dataTables.bootstrap5.min.css",
-              "src/assets/sass/theme.scss",
               "src/assets/fonts/themify-icons/themify-icons.css",
               "./node_modules/ngx-spinner/animations/ball-scale-multiple.css" ,
               "./node_modules/ngx-spinner/animations/ball-pulse-sync.css",
               "./node_modules/@ng-select/ng-select/themes/default.theme.css",
+              "src/assets/sass/theme.scss",
               "src/styles.scss"
             ],
             "scripts": [

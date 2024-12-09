@@ -80,7 +80,9 @@ export class CreacionServiciosComponent implements OnInit {
   /*SUBSERVICIO*/
   formSubServicios = new FormGroup({
     descripcion: new FormControl("", [Validators.required]),
-    monto: new FormControl("",[Validators.required]),
+    unidad: new FormControl(""),
+    soloSeleccion: new FormControl(false),
+    monto: new FormControl("",[Validators.required])
   });
   get fBusSub() {
     return this.formSubServicios.controls;
@@ -100,8 +102,24 @@ export class CreacionServiciosComponent implements OnInit {
           { data: 'id' },
           { data: 'descripcion' },
           {
+            data: 'enabled', render: (data: any, type: any, full: any) => {
+              if(data == true){
+                return '<span class="badge-sunarp badge-sunarp-green">ACTIVO</span>'
+              }
+              return '<span class="badge-sunarp badge-sunarp-red">INACTIVO</span>'
+            }
+          },
+          {
             data: 'usuario', render: (data: any, type: any, full: any) => {
-              return '<div class="btn-group"><button type="button" style ="margin-right:5px;" class="btn-sunarp-cyan edit_servicio mr-3"><i class="fa fa-pencil" aria-hidden="true"></i></button><button type="button" class="btn-sunarp-red eliminar-servicio mr-3"><i class="fa fa-trash" aria-hidden="true"></i></button></div';
+              let iconEstado:string="fa fa-toggle-off"
+              let colorEstado:string="btn-sunarp-red";
+              let titulo:string="Inhabilitar servicio";
+              if(full.enabled == false){
+                iconEstado="fa fa-toggle-on";
+                colorEstado="btn-sunarp-green";
+                titulo="Habilitar servicio";
+              }
+              return '<div class="btn-group"><button type="button" style ="margin-right:5px;" class="btn-sunarp-cyan edit_servicio mr-3"><i class="fa fa-pencil" aria-hidden="true"></i></button><button type="button" title="'+titulo+'" class="'+colorEstado+' eliminar-servicio mr-3"><i class="'+iconEstado+'" aria-hidden="true"></i></button></div';
             }
           },
         ],
@@ -114,7 +132,7 @@ export class CreacionServiciosComponent implements OnInit {
             this.editarServicio(data);
           });
           $('.eliminar-servicio', row).off().on('click', () => {
-            this.eliminarServicio(data);
+            this.habilitarService(data);
           });
           row.childNodes[0].textContent = String(index + 1);
           return row;
@@ -134,8 +152,25 @@ export class CreacionServiciosComponent implements OnInit {
             }
           },
           {
+            data: 'enabled', render: (data: any, type: any, full: any) => {
+              if(data == true){
+                return '<span class="badge-sunarp badge-sunarp-green">ACTIVO</span>'
+              }
+              return '<span class="badge-sunarp badge-sunarp-red">INACTIVO</span>'
+            }
+          },
+          {
             data: 'usuario', render: (data: any, type: any, full: any) => {
-              return '<div class="btn-group"><button type="button" style ="margin-right:5px;" class="btn-sunarp-cyan edit_subserv mr-3"><i class="fa fa-pencil" aria-hidden="true"></i></button><button type="button" class="btn-sunarp-red eliminar_subserv mr-3"><i class="fa fa-trash" aria-hidden="true"></i></button></div';
+              let iconEstado:string="fa fa-toggle-off"
+              let colorEstado:string="btn-sunarp-red";
+              let titulo:string="Inhabilitar subservicio";
+              if(full.enabled == false){
+                iconEstado="fa fa-toggle-on";
+                colorEstado="btn-sunarp-green";
+                titulo="Habilitar subservicio";
+              }
+
+              return '<div class="btn-group"><button type="button" style ="margin-right:5px;" class="btn-sunarp-cyan edit_subserv mr-3"><i class="fa fa-pencil" aria-hidden="true"></i></button><button type="button" title="'+titulo+'" class="'+colorEstado+' habilitar_subserv mr-3"><i class="'+iconEstado+'" aria-hidden="true"></i></button></div';
             }
           },
         ],
@@ -147,8 +182,8 @@ export class CreacionServiciosComponent implements OnInit {
           $('.edit_subserv', row).off().on('click', () => {
             this.mostrarEdicionSubservicio(data)
           });
-          $('.eliminar_subserv', row).off().on('click', () => {
-            this.eliminarSubservicio(data);
+          $('.habilitar_subserv', row).off().on('click', () => {
+            this.habilitarSubservicio(data);
           });
           row.childNodes[0].textContent = String(index + 1);
           return row;
@@ -255,6 +290,14 @@ export class CreacionServiciosComponent implements OnInit {
       }
     });
   }
+  habilitarService(data: any) {
+    this.spinner.show();
+    this.servicioService.habiltar(data.id,!data.enabled).subscribe(resp => {
+      alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
+      this.listarServicios();
+      this.spinner.hide();
+    });
+  }
 
   editarServicioGuardar(){
     this.formServicioEditValid = true;
@@ -275,6 +318,11 @@ export class CreacionServiciosComponent implements OnInit {
   }
 
   editarServicio(data:any){
+    if(data.enabled == false){
+      alertNotificacion("No puede editar un servicio inactivado","warning");
+      return;
+    }
+
     this.spinner.show();
     this.listaSubServicios=[];
     this.subServicioService.listar(data.id).subscribe(resp => {
@@ -310,7 +358,9 @@ export class CreacionServiciosComponent implements OnInit {
     this.subservicioModel = null;
     this.formSubServicios.setValue({
       descripcion: "",
-      monto: ""
+      monto: "",
+      unidad:"",
+      soloSeleccion:false
     });
     this.modal_subservicio_va = this.modalservice.open(this.modal_subservicio, { ...this.modalOpciones });
   }
@@ -354,6 +404,11 @@ export class CreacionServiciosComponent implements OnInit {
   }
 
   mostrarEdicionSubservicio(data: any) {
+    if(data.enabled == false){
+      alertNotificacion("No puede editar un subservicio inactivado","warning");
+      return;
+    }
+
     this.spinner.show();
     this.subServicioService.buscarPorId(data.id).subscribe(resp => {
       if (resp.cod === 1) {
@@ -361,7 +416,9 @@ export class CreacionServiciosComponent implements OnInit {
         this.subservicioModel = resp.model;
         this.formSubServicios.setValue({
           descripcion: this.subservicioModel.descripcion,
-          monto: Number(this.subservicioModel.monto)>0? new DecimalFormatPipe().transform(this.subservicioModel.monto):null
+          monto: Number(this.subservicioModel.monto)>0? new DecimalFormatPipe().transform(this.subservicioModel.monto):null,
+          unidad:this.subservicioModel.unidad,
+          soloSeleccion:this.subservicioModel.soloSeleccion
         });
       }
       else {
@@ -406,6 +463,11 @@ export class CreacionServiciosComponent implements OnInit {
       }
     });
   }
+
+  convertirEnMayusculas(campo: string): void {
+    const valorActual = this.formSubServicios.get(campo)?.value || '';
+    this.formSubServicios.get(campo)?.setValue(valorActual.toUpperCase(), { emitEvent: false });
+  }
   eliminarSubservicio(data: any) {
     Swal.fire({
       icon: "warning",
@@ -427,6 +489,15 @@ export class CreacionServiciosComponent implements OnInit {
           this.spinner.hide();
         });
       }
+    });
+  }
+
+  habilitarSubservicio(data: any) {
+    this.spinner.show();
+    this.subServicioService.habiltar(data.id,!data.enabled).subscribe(resp => {
+      alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
+      this.listarSubservicio();
+      this.spinner.hide();
     });
   }
 }

@@ -32,5 +32,8 @@ export class ServicioService {
   eliminar(id: number): Observable<any> {
     return this.http.post<any>(this.baseEndpoint + '/eliminar/' + id,null)
   }
+  habiltar(id: number,activo:boolean): Observable<any> {
+    return this.http.post<any>(this.baseEndpoint + '/habilitar/' + id+"/"+activo,null)
+  }
 
 }

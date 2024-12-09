@@ -16,6 +16,7 @@
             <tr>
               <th style="width: 30px" class="text-center">N°</th>
               <th class="text-center">Descripción</th>
+              <th class="text-center">Estado</th>
               <th class="text-center">Opciones</th>
             </tr>
           </thead>
@@ -66,6 +67,7 @@
               <th style="width: 30px" class="text-center">N°</th>
               <th class="text-center">Descripción</th>
               <th class="text-center">Monto</th>
+              <th class="text-center">Estado</th>
               <th class="text-center">Opciones</th>
             </tr>
           </thead>
@@ -143,8 +145,14 @@
                 <input formControlName="descripcion" maxlength="250" type="text" class="form-control-sunarp">
                 <small *ngIf="formSubValid && fBusSub.descripcion.errors?.required"
                   class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
-                <small *ngIf="formSubValid && fBusSub.descripcion.errors?.onlyletter_invalid"
-                  class="invalid-feedback-sunarp p-0 mt-2">Este campo solo deben ser letras</small>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-12 col-md-12 mt-2">
+                <label class="label-sunarp">Unidad (Opcional)</label>
+                <input (input)="convertirEnMayusculas('unidad')" formControlName="unidad" maxlength="250" type="text" class="form-control-sunarp">
+                <small *ngIf="formSubValid && fBusSub.unidad.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
               </div>
             </div>
             <div class="row">
@@ -154,6 +162,11 @@
                 [decimal]="true" [decimalSeparator]="'.'" formControlName="monto" type="text" class="form-control-sunarp"  (blur)="formatearMonto('monto')">
                 <small *ngIf="formSubValid && fBusSub.monto.errors?.required"
                   class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-12 col-md-12 mt-3">
+                <mat-checkbox formControlName="soloSeleccion">Solo selección</mat-checkbox>
               </div>
             </div>
           </div>

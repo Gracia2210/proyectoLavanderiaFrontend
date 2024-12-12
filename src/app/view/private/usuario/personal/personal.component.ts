@@ -1,11 +1,12 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewChildren } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbModal, NgbModalOptions, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { DataTableDirective } from 'angular-datatables';
 import { ADTSettings } from 'angular-datatables/src/models/settings';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { Subject } from 'rxjs';
 import { ClienteService } from 'src/app/service/cliente.service';
+import { PagoService } from 'src/app/service/pago.service';
 import { FormValidationCustomService } from 'src/app/util/form-validation-custom.service';
 import { alertNotificacion, languageDataTable, validStringNull } from 'src/app/util/helpers';
 import Swal from 'sweetalert2';
@@ -22,9 +23,26 @@ export class PersonalComponent implements OnInit {
     private ref: ChangeDetectorRef,
     private spinner: NgxSpinnerService,
     private clienteService: ClienteService,
-    private customvalidator: FormValidationCustomService
+    private customvalidator: FormValidationCustomService,
+    private pagoService:PagoService,
+    private fb: FormBuilder
 
-  ) { }
+  ) {
+
+    this.formPago = this.fb.group({
+      servicio: new FormControl("", [Validators.required]),
+      subservicio: new FormControl("", [Validators.required]),
+      pagos: this.fb.array([],[Validators.required]),
+    });
+
+   }
+
+  get listaPagos(): FormArray {
+    return this.formPago.get('pagos') as FormArray;
+  }
+  getPagoFormGroup(control: AbstractControl): FormGroup {
+    return control as FormGroup;
+  }
 
   formBusqueda: FormGroup = new FormGroup({
     tipo: new FormControl("1"),
@@ -62,12 +80,26 @@ export class PersonalComponent implements OnInit {
   formBusValid: Boolean = false;
 
 
+  formPago : FormGroup;
+  get fpa() {
+    return this.formPago.controls;
+  }
+  formPagoValid: Boolean = false;
+
   @ViewChildren(DataTableDirective) private dtElements;
   datatable_cliente: DataTables.Settings = {};
   datatable_dtTrigger_cliente: Subject<ADTSettings> = new Subject<ADTSettings>();
   listaCliente: any = [];
+  listaPago: any = [];
 
+  datatable_pago: DataTables.Settings = {};
+  datatable_dtTrigger_pago: Subject<ADTSettings> = new Subject<ADTSettings>();
   clienteModel:any=null;
+  @ViewChild('modal_pago') modal_pago: NgbModalRef;
+  modal_pago_va: any;
+  listaServicios : any = [];
+  listaSubServicios : any = [];
+
 
   ngOnInit() {
     setTimeout(() => {
@@ -111,12 +143,49 @@ export class PersonalComponent implements OnInit {
           return row;
         }
       }
+
+      this.datatable_pago = {
+        dom: '<"top"if>rt<"bottom">p<"clear">',
+        paging: true,
+        pagingType: 'full_numbers',
+        pageLength: 10,
+        responsive: true,
+        language: languageDataTable("Pagos pendientes Encontrados"),
+        columns: [
+          { data: 'id' },
+          { data: 'codigo' },
+          { data: 'estado' },
+          { data: 'porcentajePago' },
+          { data: 'montoPagadoInicial' },
+          { data: 'medioPago' },
+          { data: 'fechaCreacion' },
+          { data: 'fechaEntrega' },
+          { data: 'usuario' },
+          {
+            data: 'id', render: (data: any, type: any, full: any) => {
+              return '<div class="btn-group"><button type="button" style ="margin-right:5px;" class="btn-sunarp-green seleccionar_pago mr-3"><i class="fa fa-eye" aria-hidden="true"></i></button></div>';
+            }
+          },
+        ],
+        columnDefs: [
+          { orderable: false, className: "text-center align-middle", targets: 0, },
+          { className: "text-center align-middle", targets: '_all' }
+        ],
+        rowCallback: (row: Node, data: any[] | Object, index: number) => {
+          $('.seleccionar_pago', row).off().on('click', () => {
+
+          });
+          row.childNodes[0].textContent = String(index + 1);
+          return row;
+        }
+      }
     });
   }
 
   ngAfterViewInit() {
     setTimeout(() => {
       this.datatable_dtTrigger_cliente.next(this.datatable_cliente);
+      this.datatable_dtTrigger_pago.next(this.datatable_pago);
     }, 200);
   }
   convertirEnMayusculas(campo: string,form:FormGroup): void {
@@ -128,10 +197,10 @@ export class PersonalComponent implements OnInit {
     this.formCliente.get(campo)?.setValue(valorActual.toLowerCase(), { emitEvent: false });
   }
 
-  recargarTabla() {
-    let tabla_ren = this.dtElements._results[0].dtInstance;
+  recargarTabla(index:number,list:any) {
+    let tabla_ren = this.dtElements._results[index].dtInstance;
     tabla_ren.then((dtInstance: DataTables.Api) => {
-      dtInstance.search('').clear().rows.add(this.listaCliente).draw();
+      dtInstance.search('').clear().rows.add(list).draw();
     });
     this.ref.detectChanges();
   }
@@ -162,7 +231,7 @@ export class PersonalComponent implements OnInit {
       }
       else{
         this.listaCliente=resp.list;
-        this.recargarTabla();
+        this.recargarTabla(0,this.listaCliente);
       }
       this.spinner.hide();
     });
@@ -214,10 +283,93 @@ export class PersonalComponent implements OnInit {
     });
 
   }
+  listarServicio(){
+    this.spinner.show();
+    this.pagoService.listarServicios().subscribe(resp => {
+      this.listaServicios=resp;
+      this.spinner.hide();
+    });
+  }
+  buscarSubservicio(value) {
+    this.listaSubServicios=[];
+    this.fpa.subservicio.setValue(null);
+    if(value){
+      this.spinner.show();
+      this.pagoService.listarSubservicios(value).subscribe(resp => {
+          this.listaSubServicios=resp;
+        this.spinner.hide();
+      });
+    }
+  }
+
   seleccionarCliente(data:any){
-    this.clienteModel=data;
+    this.listaPago=[];
+    this.spinner.show();
+    this.pagoService.listarPagosxCliente(data.id).subscribe(resp => {
+      this.clienteModel=data;
+      if (resp.cod === 1) {
+        this.listaPago=resp.list;
+      }
+      if (resp.cod !== 1) {
+        alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
+      }
+      this.recargarTabla(1,this.listaPago);
+      this.spinner.hide();
+    });
   }
   retornarBusquedaCliente(){
     this.clienteModel=null;
   }
+
+  ejecutarAccion(tipo:number){
+    this.listarServicio();
+    this.modal_pago_va = this.modalservice.open(this.modal_pago, { ...this.modalOpciones, size: 'xl' });
+  }
+
+  agregarPagoBoton(){
+    const subservicioid=this.fpa.subservicio.value;
+    if(subservicioid){
+      const subservicio=this.listaSubServicios.find(objeto => objeto["cod"] === subservicioid);
+      console.log(subservicio)
+      this.agregarPagos(subservicio)
+    }
+
+  }
+
+  agregarPagos(data:any): void {
+    const pagosFormGroup = this.fb.group({
+      cod: new FormControl(data.cod),
+      nombre: new FormControl(data.nombre),
+      soloSeleccion: new FormControl(data.soloSeleccion),
+      unidad: new FormControl(data.unidad),
+      monto: new FormControl(data.monto.toFixed(2)),
+      cantidad: new FormControl(null,
+        [Validators.required]
+      ),
+      montoTotal: new FormControl(null,
+        [Validators.required]),
+    });
+
+    pagosFormGroup.get('cantidad')?.valueChanges.subscribe((cantidad: number) => {
+      const monto = parseFloat(pagosFormGroup.get('monto')?.value || '0');
+      const total = cantidad && cantidad > 0 ? (monto * cantidad).toFixed(2) : null;
+      pagosFormGroup.get('montoTotal')?.setValue(total);
+    });
+    this.listaPagos.push(pagosFormGroup);
+  }
+  calcularSumaMontoTotal(): string {
+    if (this.formPago.valid) {
+      const suma = this.listaPagos.controls.reduce((acumulador, control) => {
+        const montoTotal = parseFloat(control.get('montoTotal')?.value || '0');
+        return acumulador + (isNaN(montoTotal) ? 0 : montoTotal);
+      }, 0);
+      return `S/ ${suma.toFixed(2)}`;
+    }
+    return 'S/ 0.00';
+  }
+
+  eliminarPago(index: number): void {
+    this.listaPagos.removeAt(index);
+  }
+
 }

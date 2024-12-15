@@ -473,6 +473,8 @@ export class PersonalComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         const request=this.formPago.value;
+        (request as any).pagado = (this.sumaTotalPago);
+
         console.log(request)
       }
     });

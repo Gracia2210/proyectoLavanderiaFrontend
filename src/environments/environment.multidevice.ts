@@ -7,7 +7,7 @@ export const environment = {
     password:'Gracia1234'
   },
   urlApiMicroservices: {
-    domain: 'http://192.168.18.18:1515',
+    domain: 'http://192.168.18.32:1515',
   },
   apiConnectId: '',
   urlApiIp: 'https://api.ipify.org/?format=json',

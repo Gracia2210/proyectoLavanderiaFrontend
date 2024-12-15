@@ -3,13 +3,16 @@ import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Valida
 import { NgbModal, NgbModalOptions, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { DataTableDirective } from 'angular-datatables';
 import { ADTSettings } from 'angular-datatables/src/models/settings';
+import * as dayjs from 'dayjs';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { Subject } from 'rxjs';
 import { ClienteService } from 'src/app/service/cliente.service';
 import { PagoService } from 'src/app/service/pago.service';
 import { FormValidationCustomService } from 'src/app/util/form-validation-custom.service';
 import { alertNotificacion, languageDataTable, validStringNull } from 'src/app/util/helpers';
+import { DecimalFormatPipe } from 'src/app/util/pipes/decimal-format.pipe';
 import Swal from 'sweetalert2';
+
 
 @Component({
   selector: 'app-personal',
@@ -30,16 +33,17 @@ export class PersonalComponent implements OnInit {
   ) {
 
     this.formPago = this.fb.group({
-      servicio: new FormControl("", [Validators.required]),
-      subservicio: new FormControl("", [Validators.required]),
+      servicio: new FormControl(null),
+      subservicio: new FormControl(null),
+      medioPago: new FormControl(null,[Validators.required]),
+      fechaRecojo: new FormControl( dayjs().format('YYYY-MM-DD'),[Validators.required]),
+      montoPagado: new FormControl(null,[Validators.required,this.customvalidator.validarNumeroMayorZero()]),
+      observacion: new FormControl(null),
       pagos: this.fb.array([],[Validators.required]),
     });
 
-   }
-
-  get listaPagos(): FormArray {
-    return this.formPago.get('pagos') as FormArray;
   }
+
   getPagoFormGroup(control: AbstractControl): FormGroup {
     return control as FormGroup;
   }
@@ -86,6 +90,12 @@ export class PersonalComponent implements OnInit {
   }
   formPagoValid: Boolean = false;
 
+  get listaPagos(): FormArray {
+    return this.formPago.get('pagos') as FormArray;
+  }
+  sumaTotalPago:number=0;
+  porcentajeSumaTotal:string=null;
+
   @ViewChildren(DataTableDirective) private dtElements;
   datatable_cliente: DataTables.Settings = {};
   datatable_dtTrigger_cliente: Subject<ADTSettings> = new Subject<ADTSettings>();
@@ -98,6 +108,7 @@ export class PersonalComponent implements OnInit {
   @ViewChild('modal_pago') modal_pago: NgbModalRef;
   modal_pago_va: any;
   listaServicios : any = [];
+  listaMedioPago : any = [];
   listaSubServicios : any = [];
 
 
@@ -290,6 +301,14 @@ export class PersonalComponent implements OnInit {
       this.spinner.hide();
     });
   }
+  listarMedioPago(){
+    this.spinner.show();
+    this.pagoService.listarMedioPagos().subscribe(resp => {
+      this.listaMedioPago=resp;
+      this.spinner.hide();
+    });
+  }
+
   buscarSubservicio(value) {
     this.listaSubServicios=[];
     this.fpa.subservicio.setValue(null);
@@ -323,6 +342,8 @@ export class PersonalComponent implements OnInit {
 
   ejecutarAccion(tipo:number){
     this.listarServicio();
+    this.listarMedioPago();
+    this.limpiarFormularioPagos();
     this.modal_pago_va = this.modalservice.open(this.modal_pago, { ...this.modalOpciones, size: 'xl' });
   }
 
@@ -330,41 +351,57 @@ export class PersonalComponent implements OnInit {
     const subservicioid=this.fpa.subservicio.value;
     if(subservicioid){
       const subservicio=this.listaSubServicios.find(objeto => objeto["cod"] === subservicioid);
-      console.log(subservicio)
       this.agregarPagos(subservicio)
     }
 
   }
 
   agregarPagos(data:any): void {
+    const categoriaPadre=this.listaServicios.find(objeto => objeto["cod"] === this.formPago.get("servicio")?.value).nombre;
+    const servicioExiste = this.listaPagos.value.some((pago: any) => pago.cod === data.cod);
+
+    if(servicioExiste){
+      alertNotificacion("El servicio "+categoriaPadre+" / "+data.nombre+" ya ha sido agregado","warning","Por favor agregar otro servicio");
+      return;
+    }
+    this.fpa.montoPagado.setValue(null);
     const pagosFormGroup = this.fb.group({
       cod: new FormControl(data.cod),
-      nombre: new FormControl(data.nombre),
+      nombre: new FormControl(categoriaPadre+" / "+data.nombre),
       soloSeleccion: new FormControl(data.soloSeleccion),
       unidad: new FormControl(data.unidad),
       monto: new FormControl(data.monto.toFixed(2)),
       cantidad: new FormControl(null,
         [Validators.required]
       ),
-      montoTotal: new FormControl(null,
+      montoTotal: new FormControl(data.soloSeleccion?data.monto.toFixed(2):null,
         [Validators.required]),
     });
 
     pagosFormGroup.get('cantidad')?.valueChanges.subscribe((cantidad: number) => {
+      this.fpa.montoPagado.setValue(null);
       const monto = parseFloat(pagosFormGroup.get('monto')?.value || '0');
       const total = cantidad && cantidad > 0 ? (monto * cantidad).toFixed(2) : null;
       pagosFormGroup.get('montoTotal')?.setValue(total);
     });
+    this.sumaTotalPago=0;
+    this.porcentajeSumaTotal=null;
     this.listaPagos.push(pagosFormGroup);
+    this.fpa.servicio.setValue(null);
+    this.buscarSubservicio(null);
   }
   calcularSumaMontoTotal(): string {
-    if (this.formPago.valid) {
+    this.sumaTotalPago = 0;
+    const tieneErrores = this.listaPagos.controls.some(control => control.invalid);
+    if (!tieneErrores) {
       const suma = this.listaPagos.controls.reduce((acumulador, control) => {
         const montoTotal = parseFloat(control.get('montoTotal')?.value || '0');
         return acumulador + (isNaN(montoTotal) ? 0 : montoTotal);
       }, 0);
+      this.sumaTotalPago = suma;
       return `S/ ${suma.toFixed(2)}`;
     }
+
     return 'S/ 0.00';
   }
 
@@ -372,4 +409,65 @@ export class PersonalComponent implements OnInit {
     this.listaPagos.removeAt(index);
   }
 
+  formatearMonto(input: string) {
+    this.porcentajeSumaTotal=null;
+    if (this.formPago.get(input)?.value) {
+      const porcentaje:number=(Number(this.formPago.get(input)?.value)*100)/this.sumaTotalPago;
+      if(porcentaje>0 && porcentaje<=100){
+        this.porcentajeSumaTotal=(new DecimalFormatPipe().transform(porcentaje));
+      }
+      this.formPago.get(input)?.setValue(new DecimalFormatPipe().transform(this.formPago.get(input)?.value));
+    }
+  }
+  limpiarFormularioPagos(){
+    this.formPagoValid=false;
+    this.formPago.patchValue({
+      servicio: null,
+      subservicio: null,
+      medioPago: null,
+      fechaRecojo:  dayjs().format('YYYY-MM-DD'),
+      montoPagado: null,
+      observacion: null,
+    });
+    this.buscarSubservicio(null);
+    this.listaPagos.clear();
+  }
+  generarPagoTotal(){
+    this.formPagoValid=true;
+    if(this.formPago.invalid){
+      return;
+    }
+    const montoCliente=Number(this.fpa.montoPagado.value);
+    if(montoCliente>this.sumaTotalPago){
+      alertNotificacion("El monto ingresado por el cliente es superior al pago total","warning","Por favor ingresar un monto válido");
+      return;
+    }
+    else if (montoCliente<(this.sumaTotalPago*0.35)){
+      alertNotificacion("El monto ingresado por el cliente es menor al 35% del pago total","warning","Por favor ingresar un monto válido");
+      return;
+    }
+    const fechaHoy = dayjs();
+    if(dayjs(this.fpa.fechaRecojo.value).isBefore(fechaHoy, 'day')){
+      alertNotificacion("La fecha de recojo no puede ser antes de hoy","warning","Por favor ingresar una fecha válida");
+      return;
+    }
+    Swal.fire({
+      icon: "warning",
+      title: '¿Desea generar la boleta por los siguientes servicios?',
+      text: "Previamente verificar si todos los datos son correctos",
+      confirmButtonText: '<span style="padding: 0 12px;">Sí, generar</span>',
+      showCancelButton: true,
+      cancelButtonText: 'No, cancelar',
+      cancelButtonColor: '#EB3219',
+      allowEnterKey: false,
+      allowEscapeKey: false,
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const request=this.formPago.value;
+        console.log(request)
+      }
+    });
+
+  }
 }

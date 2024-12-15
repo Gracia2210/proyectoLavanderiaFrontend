@@ -19,7 +19,8 @@
           "options": {
             "allowedCommonJsDependencies": [
               "sweetalert2",
-              "moment"
+              "moment",
+              "dayjs"
             ],
             "outputPath": "dist/moduloepicsbot",
             "index": "src/index.html",

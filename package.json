@@ -29,7 +29,7 @@
     "bootstrap": "^5.2.3",
     "datatables.net": "^1.11.3",
     "datatables.net-bs5": "^1.11.3",
-    "dayjs": "^1.11.10",
+    "dayjs": "^1.11.13",
     "file-saver": "^2.0.5",
     "highcharts-angular": "^4.0.0",
     "jquery": "^3.6.0",

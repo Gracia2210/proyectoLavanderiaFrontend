@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { contarRepetidos } from './helpers';
 
 @Injectable({
@@ -25,6 +25,17 @@ export class FormValidationCustomService {
     }
     return null;
   }
+
+  validarNumeroMayorZero(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (value !== null && (isNaN(value) || value <= 0)) {
+        return { 'validarNumeroMayorZero': true };
+      }
+      return null;
+    };
+  }
+
   ValidateRucLenght(control: AbstractControl): { [key: string]: any } | null {
     let data = control.value as string;
     if (data != null || data != undefined) {

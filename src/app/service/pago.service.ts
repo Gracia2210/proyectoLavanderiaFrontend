@@ -30,4 +30,9 @@ export class PagoService {
     return this.http.get<any>(this.baseEndpoint + '/listarSubservicios', { params: params })
   }
 
+  listarMedioPagos(): Observable<any> {
+    return this.http.get<any>(this.baseEndpoint + '/listarMedioPagos')
+  }
+
+
 }

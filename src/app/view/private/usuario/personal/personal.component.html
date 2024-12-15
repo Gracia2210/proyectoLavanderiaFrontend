@@ -218,7 +218,7 @@
 <ng-template #modal_pago let-c="close" let-d="dismiss">
   <div class="modal-content">
     <div class="modal-header bg-sunarp-gray-dark">
-      <h3 class="modal-title h3-sunarp text-white">COTIZACIÓN DE SERVICIO</h3>
+      <h3 class="modal-title h3-sunarp text-white">COTIZACIÓN Y SERVICIO</h3>
       <button tabindex="-1" type="button" class="close" aria-label="Close"
         style="overflow:hidden; position: absolute; right: 30px; top: 1px;background-color: transparent;border: 0px;"
         (click)="modal_pago_va.close();">
@@ -226,8 +226,8 @@
       </button>
     </div>
     <div class="modal-body pl-5 pb-4 pr-5 pt-4">
-      <h2 class="title-typ-devo text-center" style="font-size: 25px;">REGISTRAR<span
-          class="text-sunarp-cyan"> COTIZACIÓN</span>
+      <h2 class="title-typ-devo text-center" style="font-size: 25px;">COTIZACIÓN Y <span
+          class="text-sunarp-cyan">REGISTRAR</span> SERVICIO
       </h2>
       <form [formGroup]="formPago">
         <div class="row">
@@ -251,19 +251,25 @@
                 </ng-select>
               </div>
             </div>
-            <div class="w-100 mt-3 text-center">
-              <button [disabled]="!fpa.subservicio.value" (click)="agregarPagoBoton()" type="button" class="btn-sunarp-green"><i class="fa fa-plus icon-sunarp mr-2"></i>Agregar Servicio</button>
+            <div class="w-100 mt-4 d-flex justify-content-center">
+                <button [disabled]="!fpa.subservicio.value" (click)="agregarPagoBoton()" type="button" class="btn-sunarp-green"><i
+                class="fa fa-plus icon-sunarp mr-2"></i>Agregar Servicio</button>
+                <button *ngIf="listaPagos.controls?.length == 0" style="margin-left: 10px;" (click)="modal_pago_va.close();" type="button" class="btn-sunarp-red"><i
+                class="fa fa-times icon-sunarp mr-2"></i>Salir</button>
             </div>
-            <div class="table-responsive mt-4">
+            <div *ngIf="formPagoValid && fpa.pagos.errors" class="alert alert-danger mt-3" role="alert">
+              <b>Debe agregar mínimo un servicio</b>
+            </div>
+            <div [hidden]="listaPagos.controls?.length==0" class="table-responsive mt-4">
               <table class="table table-soli-devo row-focus w-100">
                 <thead>
                   <tr>
                     <th style="width: 30px" class="text-center">N°</th>
-                    <th class="text-center">Descripción</th>
+                    <th style="width: 300px;" class="text-center">Descripción</th>
+                    <th class="text-center">Por</th>
+                    <th class="text-center">Precio</th>
+                    <th style="width: 50px;" class="text-center">Cantidad</th>
                     <th class="text-center">Monto</th>
-                    <th class="text-center">Unidad</th>
-                    <th class="text-center">Cantidad</th>
-                    <th class="text-center">Monto Total</th>
                     <th class="text-center">Acciones</th>
                   </tr>
                 </thead>
@@ -271,10 +277,10 @@
                   <tr *ngFor="let pago of listaPagos.controls; let i = index" [formGroup]="getPagoFormGroup(pago)">
                     <td class="text-center">{{ i + 1 }}</td>
                     <td class="text-center">{{ getPagoFormGroup(pago).get('nombre')?.value }}</td>
+                    <td class="text-center">{{ getPagoFormGroup(pago).get('unidad')?.value }}</td>
                     <td class="text-center fw-bold">
                       {{ getPagoFormGroup(pago).get('monto')?.value }}
                     </td>
-                    <td class="text-center">{{ getPagoFormGroup(pago).get('unidad')?.value }}</td>
                     <td class="text-center" >
                       <input
                         digitOnly
@@ -283,30 +289,67 @@
                         class="form-control-sunarp text-center"
                       />
                     </td>
-                    <td class="text-center">{{ getPagoFormGroup(pago).get('montoTotal')?.value }}</td>
+                    <td class="text-center">{{ getPagoFormGroup(pago).get('montoTotal')?.value ?getPagoFormGroup(pago).get('montoTotal')?.value :'-'}}</td>
                     <td class="text-center">
                       <button class="btn-sunarp-red" (click)="eliminarPago(i)" ><li class="fa fa-trash"></li></button>
                     </td>
                   </tr>
-                  <tr >
-                    <td colspan="6" class="text-end">Total:</td>
+                  <tr>
+                    <td colspan="6" class="text-end"><strong>Total:</strong></td>
                     <td class="text-center fw-bold">
                       <p class="text-right">
-                        <strong>Total: </strong> {{ calcularSumaMontoTotal() }}
+                        <strong></strong> {{ calcularSumaMontoTotal() }}
                       </p>
                     </td>
                   </tr>
                 </tbody>
               </table>
-
+            </div>
+            <h5 *ngIf="sumaTotalPago>0" class="mt-3 text-sunarp-cyan">Datos del pago y entrega</h5>
+            <div *ngIf="sumaTotalPago>0" class="row mt-2">
+              <div class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">Monto a pagar <strong class="text-sunarp-red">(Debe agregar mínimo el 35% del monto)</strong></label>
+                <input digitOnly [decimal]="true" [decimalSeparator]="'.'" (blur)="formatearMonto('montoPagado')" formControlName="montoPagado" class="form-control-sunarp"type="text">
+                <small *ngIf="formPagoValid && fpa.montoPagado.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+                  <small *ngIf="formPagoValid && fpa.montoPagado.errors?.required == null && fpa.montoPagado.errors?.validarNumeroMayorZero"
+                  class="invalid-feedback-sunarp p-0 mt-2">El monto no es válido</small>
+              </div>
+              <div *ngIf="porcentajeSumaTotal && fpa.montoPagado.value!=null" class="col-lg-6 col-md-12 mt-2 d-flex justify-content-center align-items-center">
+                <strong class="text-sunarp-cyan">El monto a pagar es el {{porcentajeSumaTotal}} % del pago total</strong>
+              </div>
+            </div>
+            <div *ngIf="sumaTotalPago>0" class="row mt-2">
+              <div class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">Medio de Pago</label>
+                <ng-select formControlName="medioPago" bindLabel="nombre" bindValue="cod" placeholder="SELECCIONA">
+                  <ng-option [value]="''">SELECCIONA</ng-option>
+                  <ng-option *ngFor="let item of listaMedioPago" [value]="item.cod">
+                    {{item.nombre}}</ng-option>
+                </ng-select>
+                <small *ngIf="formPagoValid && fpa.medioPago.errors?.required"
+                class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+              </div>
+              <div class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">Fecha de Recojo</label>
+                <input formControlName="fechaRecojo" class="form-control-sunarp"type="date">
+                <small *ngIf="formPagoValid && fpa.fechaRecojo.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+              </div>
+            </div>
+            <div class="row mt-2" *ngIf="sumaTotalPago>0">
+              <div class="col-md-12">
+                  <label class="label-sunarp">Observacion (Opcional):</label>
+                  <textarea formArrayName="observacion" class="form-control-sunarp" maxlength="250"></textarea>
+              </div>
             </div>
           </div>
         </div>
       </form>
     </div>
-    <div class="modal-footer d-flex justify-content-center">
-      <button [disabled]="formPago.invalid" type="button" class="btn-sunarp-cyan"><i
-          class="fa fa-plus icon-sunarp mr-2"></i>Cotizar Servicio</button>
+    <div *ngIf="listaPagos.controls?.length>0" class="modal-footer d-flex justify-content-center">
+      <button (click)="generarPagoTotal()" type="button" class="btn-sunarp-cyan"><i
+          class="fa fa-ticket icon-sunarp mr-2"></i>Generar boleta</button>
       <button (click)="modal_pago_va.close();" type="button" class="btn-sunarp-red"><i
           class="fa fa-times icon-sunarp mr-2"></i>Salir</button>
     </div>

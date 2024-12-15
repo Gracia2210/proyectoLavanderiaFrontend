@@ -266,7 +266,7 @@
                   <tr>
                     <th style="width: 30px" class="text-center">N°</th>
                     <th style="width: 300px;" class="text-center">Descripción</th>
-                    <th class="text-center">Por</th>
+                    <th class="text-center">Detalle</th>
                     <th class="text-center">Precio</th>
                     <th style="width: 50px;" class="text-center">Cantidad</th>
                     <th class="text-center">Monto</th>
@@ -277,7 +277,7 @@
                   <tr *ngFor="let pago of listaPagos.controls; let i = index" [formGroup]="getPagoFormGroup(pago)">
                     <td class="text-center">{{ i + 1 }}</td>
                     <td class="text-center">{{ getPagoFormGroup(pago).get('nombre')?.value }}</td>
-                    <td class="text-center">{{ getPagoFormGroup(pago).get('unidad')?.value }}</td>
+                    <td class="text-center"> {{getPagoFormGroup(pago).get('detalleTipo')?.value? this.retornarDetalleText(pago) :'-'}}</td>
                     <td class="text-center fw-bold">
                       {{ getPagoFormGroup(pago).get('monto')?.value }}
                     </td>

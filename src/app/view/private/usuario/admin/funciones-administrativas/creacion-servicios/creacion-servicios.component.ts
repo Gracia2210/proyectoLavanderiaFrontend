@@ -80,7 +80,8 @@ export class CreacionServiciosComponent implements OnInit {
   /*SUBSERVICIO*/
   formSubServicios = new FormGroup({
     descripcion: new FormControl("", [Validators.required]),
-    unidad: new FormControl(""),
+    tipo: new FormControl("1"),
+    detalleTipo: new FormControl(""),
     soloSeleccion: new FormControl(false),
     monto: new FormControl("",[Validators.required])
   });
@@ -359,7 +360,8 @@ export class CreacionServiciosComponent implements OnInit {
     this.formSubServicios.setValue({
       descripcion: "",
       monto: "",
-      unidad:"",
+      tipo:"1",
+      detalleTipo:"",
       soloSeleccion:false
     });
     this.modal_subservicio_va = this.modalservice.open(this.modal_subservicio, { ...this.modalOpciones });
@@ -417,7 +419,8 @@ export class CreacionServiciosComponent implements OnInit {
         this.formSubServicios.setValue({
           descripcion: this.subservicioModel.descripcion,
           monto: Number(this.subservicioModel.monto)>0? new DecimalFormatPipe().transform(this.subservicioModel.monto):null,
-          unidad:this.subservicioModel.unidad,
+          tipo:this.subservicioModel.tipo,
+          detalleTipo:this.subservicioModel.detalleTipo,
           soloSeleccion:this.subservicioModel.soloSeleccion
         });
       }

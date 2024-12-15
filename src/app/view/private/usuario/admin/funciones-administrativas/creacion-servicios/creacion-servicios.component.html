@@ -50,7 +50,7 @@
     </form>
     <div *ngIf="servicioModel!=null" class="w-100 mt-2 text-center">
       <button (click)="editarServicioGuardar()" type="button" class="btn-sunarp-yellow"><i
-        class="fa fa-save icon-sunarp"></i>Guardar</button>
+          class="fa fa-save icon-sunarp"></i>Guardar</button>
     </div>
     <div *ngIf="servicioModel!=null" class="w-100 mt-4">
       <button (click)="listarSubservicio()" style="margin-right: 20px;" type="button" class="btn-sunarp-green"><i
@@ -147,26 +147,37 @@
                   class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
               </div>
             </div>
+            <div>
+              <div class="col-lg-12 col-md-12 mt-2">
+                <mat-radio-group formControlName="tipo" style="margin-top: 20px;" class="w-100">
+                  <mat-radio-button class="mr-2" value="1" checked="true">UNIDAD
+                  </mat-radio-button>
+                  <mat-radio-button value="2">MARCA
+                  </mat-radio-button>
+                </mat-radio-group>
+              </div>
+            </div>
             <div class="row">
               <div class="col-lg-12 col-md-12 mt-2">
-                <label class="label-sunarp">Unidad (Opcional)</label>
-                <input (input)="convertirEnMayusculas('unidad')" formControlName="unidad" maxlength="250" type="text" class="form-control-sunarp">
-                <small *ngIf="formSubValid && fBusSub.unidad.errors?.required"
+                <label class="label-sunarp">Detalle simple de {{fBusSub.tipo.value == '1'?'Unidad':'Marca'}} (Opcional)</label>
+                <input (input)="convertirEnMayusculas('detalleTipo')" formControlName="detalleTipo" maxlength="250"
+                  type="text" class="form-control-sunarp">
+                <small *ngIf="formSubValid && fBusSub.detalleTipo.errors?.required"
                   class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
               </div>
             </div>
             <div class="row">
               <div class="col-lg-12 col-md-12 mt-2">
                 <label class="label-sunarp">Monto</label>
-                <input  digitOnly
-                [decimal]="true" [decimalSeparator]="'.'" formControlName="monto" type="text" class="form-control-sunarp"  (blur)="formatearMonto('monto')">
+                <input digitOnly [decimal]="true" [decimalSeparator]="'.'" formControlName="monto" type="text"
+                  class="form-control-sunarp" (blur)="formatearMonto('monto')">
                 <small *ngIf="formSubValid && fBusSub.monto.errors?.required"
                   class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
               </div>
             </div>
             <div class="row">
               <div class="col-lg-12 col-md-12 mt-3">
-                <mat-checkbox formControlName="soloSeleccion">Solo selección</mat-checkbox>
+                <mat-checkbox formControlName="soloSeleccion">Solo 1 Unidad</mat-checkbox>
               </div>
             </div>
           </div>
@@ -177,7 +188,7 @@
       <button *ngIf="tipoAccionSubservicio==1" (click)="registrarSubservicio()" type="button" class="btn-sunarp-cyan"><i
           class="fa fa-plus icon-sunarp mr-2"></i>Registrar Subservicio</button>
       <button *ngIf="tipoAccionSubservicio==2" (click)="editarSubservicio()" type="button" class="btn-sunarp-cyan"><i
-            class="fa fa-pencil icon-sunarp mr-2"></i>Modificar Subservicio</button>
+          class="fa fa-pencil icon-sunarp mr-2"></i>Modificar Subservicio</button>
       <button (click)="modal_subservicio_va.close();" type="button" class="btn-sunarp-red"><i
           class="fa fa-times icon-sunarp mr-2"></i>Salir</button>
     </div>

@@ -356,6 +356,11 @@ export class PersonalComponent implements OnInit {
 
   }
 
+  retornarDetalleText(control: AbstractControl):string{
+    const texto:string= this.getPagoFormGroup(control).get('tipo')?.value == '1' ?'POR ':'MARCA: ';
+    return texto+' '+this.getPagoFormGroup(control).get('detalleTipo')?.value
+  }
+
   agregarPagos(data:any): void {
     const categoriaPadre=this.listaServicios.find(objeto => objeto["cod"] === this.formPago.get("servicio")?.value).nombre;
     const servicioExiste = this.listaPagos.value.some((pago: any) => pago.cod === data.cod);
@@ -369,9 +374,10 @@ export class PersonalComponent implements OnInit {
       cod: new FormControl(data.cod),
       nombre: new FormControl(categoriaPadre+" / "+data.nombre),
       soloSeleccion: new FormControl(data.soloSeleccion),
-      unidad: new FormControl(data.unidad),
+      tipo: new FormControl(data.tipo),
+      detalleTipo: new FormControl(data.detalleTipo),
       monto: new FormControl(data.monto.toFixed(2)),
-      cantidad: new FormControl(null,
+      cantidad: new FormControl({value:data.soloSeleccion?1:null,disabled:data.soloSeleccion},
         [Validators.required]
       ),
       montoTotal: new FormControl(data.soloSeleccion?data.monto.toFixed(2):null,
@@ -390,6 +396,8 @@ export class PersonalComponent implements OnInit {
     this.fpa.servicio.setValue(null);
     this.buscarSubservicio(null);
   }
+
+
   calcularSumaMontoTotal(): string {
     this.sumaTotalPago = 0;
     const tieneErrores = this.listaPagos.controls.some(control => control.invalid);

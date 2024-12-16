@@ -170,7 +170,7 @@ export class PersonalComponent implements OnInit {
           { data: 'id' },
           {
             data: 'codigo', render: (data: any, type: any, full: any) => {
-              return '<span class="badge-sunarp badge-sunarp-gray-dark">'+data+'</span>'
+              return '<span class="badge-sunarp badge-sunarp-gray-dark">N° '+data+'</span>'
             }
           },
           {
@@ -200,7 +200,7 @@ export class PersonalComponent implements OnInit {
           { data: 'usuario' },
           {
             data: 'id', render: (data: any, type: any, full: any) => {
-              return '<div class="btn-group"><button type="button" style ="margin-right:5px;" class="btn-sunarp-green seleccionar_pago mr-3"><i class="fa fa-eye" aria-hidden="true"></i></button></div>';
+              return '<div class="btn-group"><button type="button" style ="margin-right:5px;" class="btn-sunarp-green seleccionar_pago mr-3"><i class="fa fa-edit" aria-hidden="true"></i></button><button type="button" style ="margin-right:5px;" class="btn-sunarp-gray-dark imprimir_boleta mr-3"><i class="fa fa-file" aria-hidden="true"></i></button></div>';
             }
           },
         ],
@@ -211,6 +211,9 @@ export class PersonalComponent implements OnInit {
         rowCallback: (row: Node, data: any[] | Object, index: number) => {
           $('.seleccionar_pago', row).off().on('click', () => {
             this.mostrarEdicionPago(data);
+          });
+          $('.imprimir_boleta', row).off().on('click', () => {
+
           });
           row.childNodes[0].textContent = String(index + 1);
           return row;

@@ -23,7 +23,7 @@
 }
 
 .form-login {
-  width: 400px;
+  width: 380px;
   .text-indication {
     background-color: #eeeeee;
     border-color: #d6d8db;
@@ -59,7 +59,6 @@
         align-items: center;
         margin: 0.9rem 0 1rem 0;
         left: 1rem;
-        background: rgba(255, 255, 255, 0.671);
         color: rgb(66, 66, 66);
         font-size: 1.8rem;
         width: 3.2rem;
@@ -70,7 +69,7 @@
         color: rgb(32, 28, 28);
         font-size: 1.0rem;
         width: 100%;
-        padding: 1rem 1rem 1rem 5rem;
+        padding: 0.7rem 0.7rem 0.7rem 3.5rem;
         border-radius: 1rem;
         border: 1.8px solid #e7e7e7;
       }
@@ -95,7 +94,7 @@
         align-items: center;
         //margin: 0.9rem 0 1rem 0;
         right: 1rem;
-        top: -3.6rem;
+        top: -3.1rem;
         //background: rgba(255, 255, 255, 0.671);
         color: rgb(66, 66, 66);
         font-size: 1.8rem;
@@ -107,7 +106,7 @@
   .btn-sunarp-cyan{
     width: 100%;
     margin-bottom: 1em;
-    padding: 1rem 0 1rem 0;
+    padding: 0.5rem 0 0.5rem 0;
     font-size: 18px;
     border-radius: 1rem;
     background-color: #58afd4 !important;

@@ -14,10 +14,8 @@ export class PagoService {
 
   private baseEndpoint = environment.urlApiMicroservices.domain + '/pago';
 
-  listarPagosxCliente(clienteId: number): Observable<any> {
-    let params = new HttpParams();
-    params = params.append('clienteId', clienteId);
-    return this.http.get<any>(this.baseEndpoint + '/listarPagosxCliente', { params: params })
+  listarPagosxCliente(data: any): Observable<any> {
+    return this.http.post<any>(this.baseEndpoint + '/listarPagosxCliente', JSON.stringify(data))
   }
 
   listarServicios(): Observable<any> {

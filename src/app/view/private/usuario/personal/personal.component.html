@@ -183,13 +183,37 @@
   </div>
 </ng-template>
 
-<h2 *ngIf="clienteModel!=null" class="h2-sunarp text-sunarp-gray-dark text-center mt-4 mb-4">{{'ENTREGAS PENDIENTES DE '+clienteModel.nombre+' '+clienteModel.apellidoPaterno+' '+clienteModel.apellidoMaterno}}</h2>
+<h2 *ngIf="clienteModel!=null" class="h2-sunarp text-sunarp-gray-dark text-center mt-4 mb-4">{{'ENTREGAS DE '+clienteModel.nombre+' '+clienteModel.apellidoPaterno+' '+clienteModel.apellidoMaterno}}</h2>
 <div [hidden]="clienteModel==null" class="lista-pagos">
   <button (click)="retornarBusquedaCliente()" type="button" class="btn-sunarp-red "><i class="fa fa-arrow-left icon-sunarp mr-2"></i>Regresar</button>
 
-  <div class="w-100 text-center mt-4">
-    <button (click)="ejecutarAccion(1)" type="button"
-      class="btn-sunarp-cyan"><i class="fa fa-shopping-cart icon-sunarp"></i>Registrar Nuevo Servicio</button>
+  <form class="mt-3" [formGroup]="formBusquedaPagosPendientes" (ngSubmit)="seleccionarCliente(this.clienteModel)">
+    <div class="row">
+      <div class="col-lg-2 col-md-12 mt-2">
+        <label class="label-sunarp">Estado</label>
+        <ng-select formControlName="tipo" bindLabel="nombre" bindValue="cod" placeholder="SELECCIONA">
+          <ng-option *ngFor="let item of listaTipoPago" [value]="item.cod">
+            {{item.nombre}}</ng-option>
+        </ng-select>
+      </div>
+      <div class="col-lg-3 col-md-12 mt-2">
+        <label class="label-sunarp">Fecha Inicio</label>
+        <input formControlName="inicio" class="form-control-sunarp"
+          type="date">
+      </div>
+      <div class="col-lg-3 col-md-12 mt-2">
+        <label class="label-sunarp">Fecha Fin</label>
+        <input formControlName="fin" class="form-control-sunarp"
+          type="date">
+      </div>
+      <div class="col-lg-4 col-md-12 mt-2">
+        <button style="margin-top: 23px;margin-right: 10px;" type="submit" class="btn-sunarp-cyan btn-reload-tabla mr-2"><i
+            class="fa fa-search icon-sunarp"></i>Buscar</button>
+        <button (click)="ejecutarAccion(1)" type="button"
+            class="btn-sunarp-green"><i class="fa fa-shopping-cart icon-sunarp"></i>Nuevo</button>
+      </div>
+    </div>
+  </form>
   <div class="table-responsive mt-4">
     <table datatable class="table thead-sunarp" datatable [dtOptions]="datatable_pago"
       [dtTrigger]="datatable_dtTrigger_pago">
@@ -211,8 +235,6 @@
       </tbody>
     </table>
   </div>
-</div>
-
 
 <ng-template #modal_pago let-c="close" let-d="dismiss">
   <div class="modal-content">
@@ -357,7 +379,7 @@
           class="fa fa-ticket icon-sunarp mr-2"></i>Generar boleta</button>
       <button *ngIf="tipoAccionPago == 2"  (click)="guardarPagoTotal()"  type="button" class="btn-sunarp-cyan"><i
             class="fa fa-pencil icon-sunarp mr-2"></i>Editar boleta</button>
-      <button *ngIf="tipoAccionPago == 2"  type="button" class="btn-sunarp-green">
+      <button *ngIf="tipoAccionPago == 2"  (click)="guardarPagoTotal(true)"  type="button" class="btn-sunarp-green">
         <i class="fas fa-shipping-fast icon-sunarp mr-2"></i>Entregar Servicio</button>
       <button (click)="modal_pago_va.close();" type="button" class="btn-sunarp-red"><i
           class="fa fa-times icon-sunarp mr-2"></i>Salir</button>

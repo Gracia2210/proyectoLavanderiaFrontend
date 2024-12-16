@@ -111,6 +111,20 @@ export class PersonalComponent implements OnInit {
 
   datatable_pago: DataTables.Settings = {};
   datatable_dtTrigger_pago: Subject<ADTSettings> = new Subject<ADTSettings>();
+  listaTipoPago:any=[
+    {
+      cod:"1",
+      nombre:"PENDIENTE"
+    },
+    {
+      cod:"2",
+      nombre:"ENTREGADO"
+    },
+    {
+      cod:"3",
+      nombre:"CANCELADO"
+    }
+  ];
   clienteModel: any = null;
   @ViewChild('modal_pago') modal_pago: NgbModalRef;
   modal_pago_va: any;
@@ -119,6 +133,12 @@ export class PersonalComponent implements OnInit {
   listaSubServicios: any = [];
   tipoAccionPago: number;
   pagoModel: any = null;
+
+  formBusquedaPagosPendientes = new FormGroup({
+    tipo: new FormControl("1"),
+    inicio: new FormControl(""),
+    fin: new FormControl(""),
+  });
 
   ngOnInit() {
     setTimeout(() => {
@@ -357,7 +377,7 @@ export class PersonalComponent implements OnInit {
   seleccionarCliente(data: any) {
     this.listaPago = [];
     this.spinner.show();
-    this.pagoService.listarPagosxCliente(data.id).subscribe(resp => {
+    this.pagoService.listarPagosxCliente({clienteId:data.id ,...this.formBusquedaPagosPendientes.value}).subscribe(resp => {
       this.clienteModel = data;
       if (resp.cod === 1) {
         this.listaPago = resp.list;
@@ -369,6 +389,10 @@ export class PersonalComponent implements OnInit {
       this.spinner.hide();
     });
   }
+
+
+
+
 
   retornarBusquedaCliente() {
     this.clienteModel = null;
@@ -482,7 +506,7 @@ export class PersonalComponent implements OnInit {
     this.buscarSubservicio(null);
     this.listaPagos.clear();
   }
-  guardarPagoTotal() {
+  guardarPagoTotal(recojo:boolean = false) {
     this.formPagoValid = true;
     if (this.formPago.invalid) {
       return;
@@ -537,11 +561,13 @@ export class PersonalComponent implements OnInit {
       });
     }
     else{
+      let textRecojo:string =(montoCliente !== this.sumaTotalPago) ?'Esta a punto de indicar que la boleta N° '+this.pagoModel.codigo+' ya ha sido pagada y el servicio entregado correctamente':'Esta a punto de indicar que el servicio de la boleta N° '+this.pagoModel.codigo+' ha sido entregado correctamente';
+      let textRecojoMsj:string="Recuerde que esta acción es permanente e indicará que la atención ya no se encuentra pendiente";
       Swal.fire({
         icon: "warning",
-        title: '¿Desea editar la boleta '+this.pagoModel.codigo+'?',
-        text: "Previamente verificar si todos los datos son correctos",
-        confirmButtonText: '<span style="padding: 0 12px;">Sí, editar</span>',
+        title:recojo?textRecojo+'<br>¿Desea continuar?':'¿Desea continuar con la edición de la boleta '+this.pagoModel.codigo+'?',
+        text: recojo?textRecojoMsj:"Previamente verificar si todos los datos son correctos",
+        confirmButtonText: '<span style="padding: 0 12px;">Sí, continuar</span>',
         showCancelButton: true,
         cancelButtonText: 'No, cancelar',
         cancelButtonColor: '#EB3219',
@@ -553,18 +579,24 @@ export class PersonalComponent implements OnInit {
           this.spinner.show();
           const request = {
             ...this.formPago.value,
-            pagado: montoCliente === this.sumaTotalPago,
+            pagado: (montoCliente === this.sumaTotalPago) || recojo,
+            entregado:recojo,
             cliente: this.clienteModel.id,
             montoTotal: this.sumaTotalPago,
             porcentaje: this.porcentajeSumaTotal,
             id:this.pagoModel.id,
             codigo:this.pagoModel.codigo
           };
+          if(recojo){
+            request.montoPagado=this.sumaTotalPago;
+          }
           this.pagoService.edicionBoleta(request).subscribe(resp => {
             if (resp.cod === 1) {
               this.modal_pago_va.close();
               this.seleccionarCliente(this.clienteModel);
-              //this.verBoleta({id:this.pagoModel.id})
+              if(recojo){
+                this.verBoleta({id:this.pagoModel.id})
+              }
             }
             alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
             this.spinner.hide();

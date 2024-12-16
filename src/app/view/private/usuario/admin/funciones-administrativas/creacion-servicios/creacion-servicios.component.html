@@ -1,3 +1,25 @@
+
+<h3 class="mt-4 mb-4 h3-sunarp">Administrar Datos del Sistema</h3>
+<div class="mt-2">
+  <div class="table-responsive">
+    <table datatable class="table thead-sunarp" datatable [dtOptions]="datatable_configuracion"
+      [dtTrigger]="datatable_dtTrigger_configuracion">
+      <thead>
+        <tr>
+          <th style="width: 30px" class="text-center">N°</th>
+          <th class="text-center">Nombre del Sistema</th>
+          <th class="text-center">Descripción</th>
+          <th class="text-center">Télefono</th>
+          <th class="text-center">Dirección</th>
+          <th class="text-center">Imagen</th>
+          <th class="text-center">Opciones</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+</div>
 <h3 class="mt-4 mb-4 h3-sunarp">Administrar Servicios en el Sistema</h3>
 <div class="w-100 mt-4">
   <button (click)="listarServicios()" style="margin-right: 20px;" type="button" class="btn-sunarp-green"><i
@@ -80,6 +102,7 @@
 </div>
 
 
+
 <ng-template #modal_servicio let-c="close" let-d="dismiss">
   <div class="modal-content">
     <div class="modal-header bg-sunarp-gray-dark">
@@ -160,7 +183,7 @@
             <div class="row">
               <div class="col-lg-12 col-md-12 mt-2">
                 <label class="label-sunarp">Detalle simple de {{fBusSub.tipo.value == '1'?'Unidad':'Marca'}} (Opcional)</label>
-                <input (input)="convertirEnMayusculas('detalleTipo')" formControlName="detalleTipo" maxlength="250"
+                <input (input)="convertirEnMayusculas(formSubServicios,'detalleTipo')" formControlName="detalleTipo" maxlength="250"
                   type="text" class="form-control-sunarp">
                 <small *ngIf="formSubValid && fBusSub.detalleTipo.errors?.required"
                   class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
@@ -190,6 +213,84 @@
       <button *ngIf="tipoAccionSubservicio==2" (click)="editarSubservicio()" type="button" class="btn-sunarp-cyan"><i
           class="fa fa-pencil icon-sunarp mr-2"></i>Modificar Subservicio</button>
       <button (click)="modal_subservicio_va.close();" type="button" class="btn-sunarp-red"><i
+          class="fa fa-times icon-sunarp mr-2"></i>Salir</button>
+    </div>
+  </div>
+</ng-template>
+
+
+<ng-template #modal_edit_config let-c="close" let-d="dismiss">
+  <div class="modal-content">
+    <div class="modal-header bg-sunarp-gray-dark">
+      <h3 class="modal-title h3-sunarp text-white">CONFIGURACIÓN</h3>
+      <button tabindex="-1" type="button" class="close" aria-label="Close"
+        style="overflow:hidden; position: absolute; right: 30px; top: 1px;background-color: transparent;border: 0px;"
+        (click)="modal_edit_config_va.close();">
+        <span aria-hidden="true" style="font-size:35px !important;" class="text-white">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body pl-5 pb-4 pr-5 pt-4">
+      <h2 class="title-typ-devo text-center" style="font-size: 20px;">EDITAR <span class="text-sunarp-cyan">
+          CONFIGURACIÓN</span>
+      </h2>
+      <form [formGroup]="formConfiguracion">
+        <div class="row">
+          <div class="col-md-12 col-lg-12">
+            <div class="row">
+              <div class="col-lg-12 col-md-12 mt-2">
+                <label class="label-sunarp">Nombre</label>
+                <input (input)="convertirEnMayusculas(formConfiguracion,'nombre')" formControlName="nombre" maxlength="250" type="text" class="form-control-sunarp">
+                <small *ngIf="formConfiguracionValid && fConfig.nombre.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+                  <small *ngIf="formConfiguracionValid && fConfig.nombre.errors?.maxlength"
+                  class="invalid-feedback-sunarp p-0 mt-2">El nombre solo debe tener máximo 12 carácteres</small>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-12 col-md-12 mt-2">
+                <label class="label-sunarp">Descripción</label>
+                <input formControlName="descripcion" maxlength="250" type="text" class="form-control-sunarp">
+                <small *ngIf="formConfiguracionValid && fConfig.descripcion.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+                  <small *ngIf="formConfiguracionValid && fConfig.descripcion.errors?.maxlength"
+                  class="invalid-feedback-sunarp p-0 mt-2">La descripcion solo debe tener máximo 20 carácteres</small>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-12 col-md-12 mt-2">
+                <label class="label-sunarp">Teléfono/Celular</label>
+                <input formControlName="telefono" maxlength="250" type="text" class="form-control-sunarp">
+                <small *ngIf="formConfiguracionValid && fConfig.telefono.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+                  <small *ngIf="formConfiguracionValid && fConfig.telefono.errors?.onlynumber_invalid"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo solo debe contener dígitos</small>
+                <small
+                  *ngIf="formConfiguracionValid && fConfig.telefono.errors?.telfcel_invalid && fConfig.telefono.errors?.onlynumber_invalid==null"
+                  class="invalid-feedback-sunarp p-0 mt-2">El telefóno solo debe tener entre 7 y 9 dígitos</small>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-12 col-md-12 mt-2">
+                <label class="label-sunarp">Dirección</label>
+                <textarea formControlName="direccion" class="form-control-sunarp" maxlength="250"></textarea>
+                <small *ngIf="formConfiguracionValid && fConfig.direccion.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-12 col-md-12 mt-2">
+                <label class="label-sunarp">Modificar Imagen</label><br>
+                <input accept="image/png, image/jpeg"  (change)="onFileSelectedConfiguracion($event)" type="file" class="form-control-sunarp">
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer d-flex justify-content-center">
+      <button (click)="guardarConfiguracionSistema()" type="button" class="btn-sunarp-cyan"><i
+          class="fa fa-pencil icon-sunarp mr-2"></i>Editar Configuración</button>
+      <button (click)="modal_edit_config_va.close();" type="button" class="btn-sunarp-red"><i
           class="fa fa-times icon-sunarp mr-2"></i>Salir</button>
     </div>
   </div>

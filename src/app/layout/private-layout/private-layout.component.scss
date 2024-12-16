@@ -26,11 +26,13 @@
   display: flex;
   width: 100%;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  
 }
 
 .title-navbar-img {
   width: 48px;
+  margin-top: -10px;
 }
 .leftsidebar-version {
   width: 100%;
@@ -57,7 +59,7 @@
 
 .svg-hamburger path {
   fill: none;
-  stroke: $sunarp-white;
+  stroke: $sunarp-black;
   stroke-width: 4px;
 }
 

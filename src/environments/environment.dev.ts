@@ -1,7 +1,7 @@
 export const environment = {
   appName: 'SOFT CLEAN',
   isTest: false,
-  nameSystem: 'SOFT CLEAN',
+  nameSystem: 'Sistema de Lavandería',
   authAngular:{
     username:'s_soft_clean',
     password:'Gracia1234'

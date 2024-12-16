@@ -1,10 +1,13 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild, ViewChildren } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { NgbModal, NgbModalOptions, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { DataTableDirective } from 'angular-datatables';
 import { ADTSettings } from 'angular-datatables/src/models/settings';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { Subject } from 'rxjs';
+import { AuthService } from 'src/app/service/auth.service';
+import { ConfiguracionService } from 'src/app/service/configuracion.service';
 import { ServicioService } from 'src/app/service/servicio.service';
 import { SubServicioService } from 'src/app/service/subservicio.service';
 import { FormValidationCustomService } from 'src/app/util/form-validation-custom.service';
@@ -29,6 +32,9 @@ export class CreacionServiciosComponent implements OnInit {
     private customvalidator: FormValidationCustomService,
     private subServicioService:SubServicioService,
     private valormonpipe: ValorMonetarioPipe,
+    private configuracionService:ConfiguracionService,
+    private authService:AuthService,
+    private router: Router,
 
   ) { }
 
@@ -92,8 +98,71 @@ export class CreacionServiciosComponent implements OnInit {
   subservicioModel:any=null;
   tipoAccionSubservicio: number;
 
+  datatable_configuracion: DataTables.Settings = {};
+
+  datatable_dtTrigger_configuracion: Subject<ADTSettings> = new Subject<ADTSettings>();
+
+  listaConfiguracion: any = [];
+
+  @ViewChild('modal_edit_config') modal_edit_config: NgbModalRef;
+  modal_edit_config_va: any;
+
+  formConfiguracion = new FormGroup({
+    id: new FormControl(""),
+    nombre: new FormControl("", [Validators.required,Validators.maxLength(12)]),
+    descripcion: new FormControl("", [Validators.required,Validators.maxLength(20)]),
+    direccion: new FormControl("", [Validators.required]),
+    telefono: new FormControl("", [Validators.required, this.customvalidator.ValidateTelfCelLenght, this.customvalidator.ValidateOnlyNumber])
+  });
+  get fConfig() {
+    return this.formConfiguracion.controls;
+  }
+  formConfiguracionValid: Boolean = false;
+  selectedFileConfiguracion: File | null = null;
+
   ngOnInit() {
     setTimeout(() => {
+
+      this.datatable_configuracion = {
+        dom: '<"top">rt<"bottom"><"clear">',
+        paging: false,
+        responsive: true,
+        language: languageDataTable("Servicios"),
+        columns: [
+          { data: 'id' },
+          { data: 'nombre' },
+          { data: 'descripcion' },         
+          { data: 'direccion' },
+          { data: 'telefono' },
+          {
+            data: 'nombreImagen', render: (data: any, type: any, full: any) => {
+              if(data){
+                return '<span class="badge-sunarp badge-sunarp-green">GUARDADO</span>'
+              }
+              return '<span class="badge-sunarp badge-sunarp-gray-dark">NO GUARDADO</span>'
+            }
+          },
+          {
+            data: 'id', render: (data: any, type: any, full: any) => {
+              return '<div class="btn-group"><button type="button" style ="margin-right:5px;" class="btn-sunarp-cyan edit_config mr-3"><i class="fa fa-pencil" aria-hidden="true"></i></button><button type="button" style ="margin-right:5px;" class="btn-sunarp-green image_config mr-3"><i class="fa fa-image" aria-hidden="true"></i></button></div';
+            }
+          },
+        ],
+        columnDefs: [
+          { orderable: false, className: "text-center align-middle", targets: 0, },
+          { className: "text-center align-middle", targets: '_all' }
+        ],
+        rowCallback: (row: Node, data: any[] | Object, index: number) => {
+          $('.edit_config', row).off().on('click', () => {
+            this.editarConfiguracion(data);
+          });
+          $('.image_config', row).off().on('click', () => {
+            this.mostrarImagenConfiguracion(data);
+          });
+          row.childNodes[0].textContent = String(index + 1);
+          return row;
+        }
+      }
       this.datatable_servicios = {
         dom: '<"top"i>rt<"bottom"><"clear">',
         paging: false,
@@ -196,10 +265,28 @@ export class CreacionServiciosComponent implements OnInit {
 
   ngAfterViewInit() {
     setTimeout(() => {
+      this.datatable_dtTrigger_configuracion.next(this.datatable_configuracion);     
       this.datatable_dtTrigger_servicios.next(this.datatable_servicios);
       this.datatable_dtTrigger_subservicio.next(this.datatable_subservicio);
       this.listarServicios();
+      this.listarConfiguracion();
     }, 200);
+  }
+
+
+  listarConfiguracion() {
+    this.spinner.show();
+    this.listaConfiguracion = [];
+    this.configuracionService.listarConfiguracion().subscribe(resp => {
+      if (resp.cod == 1) {
+        this.listaConfiguracion = resp.list;
+      }
+      if(resp.cod == -1){
+        alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
+      }
+      this.recargarTabla(0,this.listaConfiguracion);
+      this.spinner.hide();
+    });
   }
 
   listarServicios() {
@@ -214,10 +301,13 @@ export class CreacionServiciosComponent implements OnInit {
       if(resp.cod == -1){
         alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
       }
-      this.recargarTabla(0,this.listaServicios);
+      this.recargarTabla(1,this.listaServicios);
       this.spinner.hide();
     });
   }
+
+
+
 
   recargarTabla(index:number,lista:any) {
     let tabla_ren = this.dtElements._results[index].dtInstance;
@@ -331,7 +421,7 @@ export class CreacionServiciosComponent implements OnInit {
       if (resp.cod === 1) {
         this.listaSubServicios=resp.list;
       }
-      this.recargarTabla(1,this.listaSubServicios);
+      this.recargarTabla(2,this.listaSubServicios);
       this.formServicioEditValid=false;
       this.formServiciosEdit.setValue({
         descripcion: this.servicioModel.descripcion
@@ -347,7 +437,7 @@ export class CreacionServiciosComponent implements OnInit {
         if (resp.cod === 1) {
           this.listaSubServicios=resp.list;
         }
-        this.recargarTabla(1,this.listaSubServicios);
+        this.recargarTabla(2,this.listaSubServicios);
         this.spinner.hide();
       });
     }
@@ -467,9 +557,9 @@ export class CreacionServiciosComponent implements OnInit {
     });
   }
 
-  convertirEnMayusculas(campo: string): void {
-    const valorActual = this.formSubServicios.get(campo)?.value || '';
-    this.formSubServicios.get(campo)?.setValue(valorActual.toUpperCase(), { emitEvent: false });
+  convertirEnMayusculas(form:FormGroup,campo: string): void {
+    const valorActual = form.get(campo)?.value || '';
+    form.get(campo)?.setValue(valorActual.toUpperCase(), { emitEvent: false });
   }
   eliminarSubservicio(data: any) {
     Swal.fire({
@@ -503,4 +593,98 @@ export class CreacionServiciosComponent implements OnInit {
       this.spinner.hide();
     });
   }
+
+  editarConfiguracion(data){
+    this.formConfiguracionValid=false;
+
+    this.formConfiguracion.patchValue({
+      id:data.id,
+      nombre:data.nombre,
+      descripcion:data.descripcion,
+      direccion:data.direccion,
+      telefono:data.telefono
+    });
+    this.modal_edit_config_va = this.modalservice.open(this.modal_edit_config, { ...this.modalOpciones });
+  }
+
+
+  onFileSelectedConfiguracion(event: any): void {
+    const file = event.target.files[0];
+    if (file === undefined || file === null) {
+      this.selectedFileConfiguracion = null;
+    }
+    else {
+      this.selectedFileConfiguracion = file;
+    }
+    console.log(this.selectedFileConfiguracion)
+  }
+  guardarConfiguracionSistema(){
+    this.formConfiguracionValid=true;
+    if(this.formConfiguracion.invalid){
+      return;
+    }
+    
+    Swal.fire({
+      icon: "warning",
+      title: "¿Desea modificar los datos de la configuración de Sistema?",
+      text: "Por se recomienda revisa exhaustivamente esta acción",
+      confirmButtonText: '<span style="padding: 0 12px;">Sí, modificar</span>',
+      showCancelButton: true,
+      cancelButtonText: 'No, cancelar',
+      cancelButtonColor: '#EB3219',
+      allowEnterKey: false,
+      allowEscapeKey: false,
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const formValues = this.formConfiguracion.getRawValue();
+        this.spinner.show();
+        this.configuracionService.editarConfiguracion(formValues, this.selectedFileConfiguracion).subscribe(resp => {
+          if (resp.cod === 1) {
+            this.modalservice.dismissAll();
+            this.spinner.hide();
+            this.authService.logout();
+            this.router.navigate(["/login"]);
+            //this.listarConfiguracion();
+          }
+          alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
+          this.spinner.hide();
+        });
+      }
+    });
+  }
+
+  convertBase64ToJpg(data: string) {
+    if (data != null) {
+      const base64str = data;
+      const binary = atob(base64str.replace(/\s/g, ''));
+      const len = binary.length;
+      const buffer = new ArrayBuffer(len);
+      const view = new Uint8Array(buffer);
+  
+      for (let i = 0; i < len; i++) {
+        view[i] = binary.charCodeAt(i);
+      }
+  
+      const file = new Blob([view], { type: 'image/jpeg' });
+      const fileURL = URL.createObjectURL(file);
+  
+      // Abrir la imagen JPG en una nueva ventana o pestaña
+      window.open(fileURL, '_blank');
+    }
+  }
+  
+  mostrarImagenConfiguracion(data){
+    this.spinner.show();
+    this.configuracionService.obtenerImagen(data.id).subscribe(resp => {
+      if (resp.cod !== 1) {
+        alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
+      }
+      if (resp.cod == 1) {
+       this.convertBase64ToJpg(resp.model);
+      }
+      this.spinner.hide();
+    });
+  }
+
 }

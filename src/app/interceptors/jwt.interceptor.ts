@@ -13,7 +13,7 @@ export class JwtInterceptor implements HttpInterceptor {
     let id = environment.apiConnectId;
     if(!request.url.includes('oauth/token') && token && !request.url.includes('api.ipify.org')) {
 
-      if(request.url.includes('crearArchivo') || request.url.includes('editarArchivo') || request.url.includes('enviarMensajeConArchivo')  || request.url.includes('export.highcharts.com')  || request.url.includes('speakToText') ){
+      if(request.url.includes('editarConfiguracion') || request.url.includes('editarArchivo') || request.url.includes('enviarMensajeConArchivo')  || request.url.includes('export.highcharts.com')  || request.url.includes('speakToText') ){
         request = request.clone({
           setHeaders: {
             "Authorization": "Bearer " + token,

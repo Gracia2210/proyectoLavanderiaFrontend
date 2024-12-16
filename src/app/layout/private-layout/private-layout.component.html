@@ -18,8 +18,11 @@
           </g>
         </g>
       </svg>
-      <img class="title-navbar-img" src="assets/img/sistema/logo-sunarp-white.png">
-      <span class="title-navbar-sistema">SOFT<span class="text-sunarp-cyan">CLEAN</span></span>
+      <div class="w-100 text-center">
+        <img *ngIf="configuracionGlobal.imagen == null" class="title-navbar-img" src="assets/img/sistema/logo-sunarp-white.png">
+        <img *ngIf="configuracionGlobal.imagen != null" class="title-navbar-img" [src]="'data:image/png;base64,'+configuracionGlobal.imagen" alt="Logo">
+        <span class="title-navbar-sistema">{{configuracionGlobal.nombre}}</span>
+      </div>
     </div>
   </nav>
   <aside [ngClass]="{ 'lg-resize': isMenuOculto, '':  !isMenuOculto}" id="leftsidebar" class="sidebar">

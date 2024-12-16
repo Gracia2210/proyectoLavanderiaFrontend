@@ -1,8 +1,10 @@
+import { ConfiguracionGlobal } from './../../../interfaces/configuracion-global';
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { AuthService } from 'src/app/service/auth.service';
+import { PublicoService } from 'src/app/service/public.service';
 import { alertNotificacion } from 'src/app/util/helpers';
 import { environment } from 'src/environments/environment';
 import Swal, { SweetAlertIcon } from 'sweetalert2';
@@ -15,12 +17,28 @@ import Swal, { SweetAlertIcon } from 'sweetalert2';
 })
 export class LoginComponent {
   version:string;
-  constructor(private router: Router, private spinner: NgxSpinnerService,private _authService:AuthService) {
+  constructor(private router: Router, private spinner: NgxSpinnerService,private _authService:AuthService,private publicoService:PublicoService) {
     this.version = environment.version;
   }
   NAME_SYSTEM:string=environment.nameSystem.toUpperCase();
   hide = true;
   passwordDefault:string=environment.passwordDefault;
+  configuracionGlobal:ConfiguracionGlobal = new ConfiguracionGlobal();
+  tituloParte1:string;
+
+  
+  ngOnInit(): void {
+    this.spinner.show();
+    this.publicoService.obtenerConfiguracionGlobal().subscribe(resp => {
+      if (resp.cod !== 1) {
+        alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
+      }
+      else{
+        this.configuracionGlobal=resp.model;
+      }
+      this.spinner.hide();
+    });
+  }
 
   subFormLogin = false;
   form_login = new FormGroup({
@@ -88,5 +106,6 @@ export class LoginComponent {
       }
     );
   }
+
 
 }

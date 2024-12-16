@@ -531,7 +531,6 @@ export class PersonalComponent implements OnInit {
               this.verBoleta({id:resp.model})
             }
             alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
-            this.spinner.hide();
           });
 
         }

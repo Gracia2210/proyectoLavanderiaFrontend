@@ -3,7 +3,10 @@ import { Router } from '@angular/router';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { Usuario } from 'src/app/interfaces/auth/usuario';
+import { ConfiguracionGlobal } from 'src/app/interfaces/configuracion-global';
 import { AuthService } from 'src/app/service/auth.service';
+import { PublicoService } from 'src/app/service/public.service';
+import { alertNotificacion } from 'src/app/util/helpers';
 import { environment } from 'src/environments/environment';
 import Swal from 'sweetalert2';
 
@@ -24,9 +27,9 @@ export class PrivateLayoutComponent {
   isMenuOculto: boolean = true;
   isContainerFull: boolean = true;
   isButtonMenu: boolean = true;
-  resizeTimeout:any;
-
-    /*********************************************************************************************************************************/
+  resizeTimeout: any;
+  configuracionGlobal: ConfiguracionGlobal = new ConfiguracionGlobal();
+  /*********************************************************************************************************************************/
   /*   VARIABLE GLOBALES*/
   /*********************************************************************************************************************************/
   usuario: Usuario = null;
@@ -35,7 +38,8 @@ export class PrivateLayoutComponent {
     private ref: ChangeDetectorRef,
     private router: Router,
     private modalService: NgbModal,
-    public _authService:AuthService
+    public _authService: AuthService,
+    public publicoService: PublicoService
 
   ) {
     this.innerWidth = window.innerWidth;
@@ -63,6 +67,7 @@ export class PrivateLayoutComponent {
 
   ngOnInit(): void {
     this.resize_menu(this.innerWidth);
+    this.cargarConfiguracion();
     this.usuario = this._authService.usuario;
   }
 
@@ -73,15 +78,28 @@ export class PrivateLayoutComponent {
     this.router.navigate(["/login"]);
   }
 
-  verChatBot(){
+  verChatBot() {
     this.router.navigate(["/usuario/chatbot"]);
   }
-  verFuncionesAdministrativas(){
+  verFuncionesAdministrativas() {
     this.router.navigate(["/usuario/admin/funciones"]);
   }
 
-  verPermisos(){
+  verPermisos() {
     return this._authService.obtenerRol();
+  }
+
+  cargarConfiguracion() {
+    this.spinner.show();
+    this.publicoService.obtenerConfiguracionGlobal().subscribe(resp => {
+      if (resp.cod !== 1) {
+        alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
+      }
+      else {
+        this.configuracionGlobal = resp.model;
+      }
+      this.spinner.hide();
+    });
   }
 
 }

@@ -526,7 +526,9 @@ export class PersonalComponent implements OnInit {
           this.pagoService.generarBoleta(request).subscribe(resp => {
             if (resp.cod === 1) {
               this.modal_pago_va.close();
-              this.seleccionarCliente(this.clienteModel)
+              this.seleccionarCliente(this.clienteModel);
+
+              this.verBoleta({id:resp.model})
             }
             alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
             this.spinner.hide();
@@ -562,7 +564,8 @@ export class PersonalComponent implements OnInit {
           this.pagoService.edicionBoleta(request).subscribe(resp => {
             if (resp.cod === 1) {
               this.modal_pago_va.close();
-              this.seleccionarCliente(this.clienteModel)
+              this.seleccionarCliente(this.clienteModel);
+              //this.verBoleta({id:this.pagoModel.id})
             }
             alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
             this.spinner.hide();
@@ -616,4 +619,29 @@ export class PersonalComponent implements OnInit {
       this.spinner.hide();
     });
   }
+
+  imprimirBoleta() {
+    this.converBase64Pdf(this.contenidoBoletoVisor,250);
+  }
+
+  converBase64Pdf(data: string, zoom: number = 100) {
+    if (data != null) {
+      const base64str = data;
+      const binary = atob(base64str.replace(/\s/g, ''));
+      const len = binary.length;
+      const buffer = new ArrayBuffer(len);
+      const view = new Uint8Array(buffer);
+      for (let i = 0; i < len; i++) {
+        view[i] = binary.charCodeAt(i);
+      }
+      const file = new Blob([view], { type: 'application/pdf' });
+      const fileURL = URL.createObjectURL(file);
+
+      // Agregar el parámetro de zoom al abrir el PDF
+      const zoomParam = `#zoom=${zoom}`;
+      const fileWithZoom = `${fileURL}${zoomParam}`;
+      window.open(fileWithZoom, '_blank');
+    }
+  }
+
 }

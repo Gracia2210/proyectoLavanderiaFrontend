@@ -1,7 +1,7 @@
 
 
 <div [hidden]="clienteModel!=null" class="busqueda-cliente">
-  <h2 class="h2-sunarp text-sunarp-gray-dark text-center mt-4 mb-4">Busqueda de Clientes</h2>
+  <h2 class="h2-sunarp text-sunarp-gray-dark text-center mt-4 mb-4">BUSQUEDA DE CLIENTES</h2>
   <div class="row mb-4">
     <div class="col-md-12 col-lg-12">
       <form [formGroup]="formBusqueda" (ngSubmit)="buscarClientes()">
@@ -183,7 +183,7 @@
   </div>
 </ng-template>
 
-<h2 *ngIf="clienteModel!=null" class="h2-sunarp text-sunarp-gray-dark text-center mt-4 mb-4">{{'Pagos Pendientes de '+clienteModel.nombre+' '+clienteModel.apellidoPaterno+' '+clienteModel.apellidoMaterno}}</h2>
+<h2 *ngIf="clienteModel!=null" class="h2-sunarp text-sunarp-gray-dark text-center mt-4 mb-4">{{'ENTREGAS PENDIENTES DE '+clienteModel.nombre+' '+clienteModel.apellidoPaterno+' '+clienteModel.apellidoMaterno}}</h2>
 <div [hidden]="clienteModel==null" class="lista-pagos">
   <button (click)="retornarBusquedaCliente()" type="button" class="btn-sunarp-red "><i class="fa fa-arrow-left icon-sunarp mr-2"></i>Regresar</button>
 
@@ -197,13 +197,12 @@
         <tr>
           <th style="width: 30px" class="text-center">N°</th>
           <th class="text-center">Código</th>
+          <th class="text-center">Monto</th>
+          <th class="text-center">Monto Pagado</th>
+          <th class="text-center">Pago</th>
+          <th class="text-center">Fecha Recojo</th>
           <th class="text-center">Estado</th>
-          <th class="text-center">Porcentaje Pagado</th>
-          <th class="text-center">Monto Pagado Inicial</th>
-          <th class="text-center">Medio Pago</th>
-          <th class="text-center">Fecha Creación</th>
-          <th class="text-center">Fecha Entrega</th>
-          <th class="text-center">Usuario</th>
+          <th class="text-center">Usuario Creador</th>
           <th class="text-center">Opciones</th>
         </tr>
       </thead>
@@ -226,9 +225,15 @@
       </button>
     </div>
     <div class="modal-body pl-5 pb-4 pr-5 pt-4">
-      <h2 class="title-typ-devo text-center" style="font-size: 25px;">COTIZACIÓN Y <span
-          class="text-sunarp-cyan">REGISTRAR</span> SERVICIO
+      <h2 *ngIf="tipoAccionPago == 1" class="title-typ-devo text-center" style="font-size: 25px;">COTIZACIÓN Y <span
+          class="text-sunarp-cyan">REGISTRO</span> DE SERVICIO
       </h2>
+      <h2 *ngIf="tipoAccionPago == 2 && pagoModel != null" class="title-typ-devo text-center" style="font-size: 25px;">EDICIÓN DE BOLETA <span
+        class="text-sunarp-cyan">N° {{pagoModel.codigo}}</span>
+       </h2>
+      <div *ngIf="tipoAccionPago == 2 && pagoModel != null" class="w-100 mt-3 text-center">
+        <span><strong>Fecha de Creación: </strong>{{pagoModel.fechaCreacion}}</span>
+      </div>
       <form [formGroup]="formPago">
         <div class="row">
           <div class="col-md-12 col-lg-12">
@@ -340,7 +345,7 @@
             <div class="row mt-2" *ngIf="sumaTotalPago>0">
               <div class="col-md-12">
                   <label class="label-sunarp">Observacion (Opcional):</label>
-                  <textarea formArrayName="observacion" class="form-control-sunarp" maxlength="250"></textarea>
+                  <textarea formControlName="observacion" class="form-control-sunarp" maxlength="250"></textarea>
               </div>
             </div>
           </div>
@@ -348,8 +353,12 @@
       </form>
     </div>
     <div *ngIf="listaPagos.controls?.length>0" class="modal-footer d-flex justify-content-center">
-      <button (click)="generarPagoTotal()" type="button" class="btn-sunarp-cyan"><i
+      <button *ngIf="tipoAccionPago == 1" (click)="guardarPagoTotal()" type="button" class="btn-sunarp-cyan"><i
           class="fa fa-ticket icon-sunarp mr-2"></i>Generar boleta</button>
+      <button *ngIf="tipoAccionPago == 2"  (click)="guardarPagoTotal()"  type="button" class="btn-sunarp-cyan"><i
+            class="fa fa-pencil icon-sunarp mr-2"></i>Editar boleta</button>
+      <button *ngIf="tipoAccionPago == 2"  type="button" class="btn-sunarp-green">
+        <i class="fas fa-shipping-fast icon-sunarp mr-2"></i>Entregar Servicio</button>
       <button (click)="modal_pago_va.close();" type="button" class="btn-sunarp-red"><i
           class="fa fa-times icon-sunarp mr-2"></i>Salir</button>
     </div>

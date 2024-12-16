@@ -34,5 +34,15 @@ export class PagoService {
     return this.http.get<any>(this.baseEndpoint + '/listarMedioPagos')
   }
 
-
+  generarBoleta(data: any): Observable<any> {
+    return this.http.post<any>(this.baseEndpoint + '/generarBoleta', JSON.stringify(data))
+  }
+  obtenerPagoEdit(pago: number): Observable<any> {
+    let params = new HttpParams();
+    params = params.append('pago', pago);
+    return this.http.get<any>(this.baseEndpoint + '/obtenerPagoEdit', { params: params })
+  }
+  edicionBoleta(data: any): Observable<any> {
+    return this.http.post<any>(this.baseEndpoint + '/edicionBoleta', JSON.stringify(data))
+  }
 }

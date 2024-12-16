@@ -11,13 +11,15 @@ import { PagoService } from 'src/app/service/pago.service';
 import { FormValidationCustomService } from 'src/app/util/form-validation-custom.service';
 import { alertNotificacion, languageDataTable, validStringNull } from 'src/app/util/helpers';
 import { DecimalFormatPipe } from 'src/app/util/pipes/decimal-format.pipe';
+import { ValorMonetarioPipe } from 'src/app/util/pipes/valor-monetario.pipe';
 import Swal from 'sweetalert2';
 
 
 @Component({
   selector: 'app-personal',
   templateUrl: './personal.component.html',
-  styleUrls: ['./personal.component.scss']
+  styleUrls: ['./personal.component.scss'],
+  providers: [ValorMonetarioPipe]
 })
 export class PersonalComponent implements OnInit {
 
@@ -27,19 +29,20 @@ export class PersonalComponent implements OnInit {
     private spinner: NgxSpinnerService,
     private clienteService: ClienteService,
     private customvalidator: FormValidationCustomService,
-    private pagoService:PagoService,
-    private fb: FormBuilder
+    private pagoService: PagoService,
+    private fb: FormBuilder,
+    private valormonpipe: ValorMonetarioPipe
 
   ) {
 
     this.formPago = this.fb.group({
       servicio: new FormControl(null),
       subservicio: new FormControl(null),
-      medioPago: new FormControl(null,[Validators.required]),
-      fechaRecojo: new FormControl( dayjs().format('YYYY-MM-DD'),[Validators.required]),
-      montoPagado: new FormControl(null,[Validators.required,this.customvalidator.validarNumeroMayorZero()]),
+      medioPago: new FormControl(null, [Validators.required]),
+      fechaRecojo: new FormControl(dayjs().format('YYYY-MM-DD'), [Validators.required]),
+      montoPagado: new FormControl(null, [Validators.required, this.customvalidator.validarNumeroMayorZero()]),
       observacion: new FormControl(null),
-      pagos: this.fb.array([],[Validators.required]),
+      pagos: this.fb.array([], [Validators.required]),
     });
 
   }
@@ -50,10 +53,10 @@ export class PersonalComponent implements OnInit {
 
   formBusqueda: FormGroup = new FormGroup({
     tipo: new FormControl("1"),
-    nombre: new FormControl("",[this.customvalidator.ValidateOnlyLetter]),
-    paterno: new FormControl("",[this.customvalidator.ValidateOnlyLetter]),
-    materno: new FormControl("",[this.customvalidator.ValidateOnlyLetter]),
-    dni: new FormControl("",[this.customvalidator.ValidateOnlyNumber, this.customvalidator.ValidateLibElecLenght]),
+    nombre: new FormControl("", [this.customvalidator.ValidateOnlyLetter]),
+    paterno: new FormControl("", [this.customvalidator.ValidateOnlyLetter]),
+    materno: new FormControl("", [this.customvalidator.ValidateOnlyLetter]),
+    dni: new FormControl("", [this.customvalidator.ValidateOnlyNumber, this.customvalidator.ValidateLibElecLenght]),
   });
 
   get fbus() {
@@ -71,11 +74,11 @@ export class PersonalComponent implements OnInit {
   modal_ver_cliente_va: any;
 
   formCliente = new FormGroup({
-    docIden: new FormControl("", [Validators.required,this.customvalidator.ValidateOnlyNumber, this.customvalidator.ValidateLibElecLenght]),
+    docIden: new FormControl("", [Validators.required, this.customvalidator.ValidateOnlyNumber, this.customvalidator.ValidateLibElecLenght]),
     apellidoPaterno: new FormControl("", [Validators.required, this.customvalidator.ValidateOnlyLetter]),
     apellidoMaterno: new FormControl("", [Validators.required, this.customvalidator.ValidateOnlyLetter]),
     nombre: new FormControl("", [Validators.required, this.customvalidator.ValidateOnlyLetter]),
-    email: new FormControl("",[Validators.email]),
+    email: new FormControl("", [Validators.email]),
     telefono: new FormControl("", [Validators.required, this.customvalidator.ValidateTelfCelLenght, this.customvalidator.ValidateOnlyNumber]),
   });
   get fBus() {
@@ -84,7 +87,7 @@ export class PersonalComponent implements OnInit {
   formBusValid: Boolean = false;
 
 
-  formPago : FormGroup;
+  formPago: FormGroup;
   get fpa() {
     return this.formPago.controls;
   }
@@ -93,8 +96,8 @@ export class PersonalComponent implements OnInit {
   get listaPagos(): FormArray {
     return this.formPago.get('pagos') as FormArray;
   }
-  sumaTotalPago:number=0;
-  porcentajeSumaTotal:string=null;
+  sumaTotalPago: number = 0;
+  porcentajeSumaTotal: string = null;
 
   @ViewChildren(DataTableDirective) private dtElements;
   datatable_cliente: DataTables.Settings = {};
@@ -104,13 +107,14 @@ export class PersonalComponent implements OnInit {
 
   datatable_pago: DataTables.Settings = {};
   datatable_dtTrigger_pago: Subject<ADTSettings> = new Subject<ADTSettings>();
-  clienteModel:any=null;
+  clienteModel: any = null;
   @ViewChild('modal_pago') modal_pago: NgbModalRef;
   modal_pago_va: any;
-  listaServicios : any = [];
-  listaMedioPago : any = [];
-  listaSubServicios : any = [];
-
+  listaServicios: any = [];
+  listaMedioPago: any = [];
+  listaSubServicios: any = [];
+  tipoAccionPago: number;
+  pagoModel: any = null;
 
   ngOnInit() {
     setTimeout(() => {
@@ -130,8 +134,8 @@ export class PersonalComponent implements OnInit {
           { data: 'telefono' },
           {
             data: 'email', render: (data: any, type: any, full: any) => {
-              if(data == null || data == ""){
-                return '<span class="badge-sunarp badge-sunarp-gray-dark">NO REGISTRADO</span>'
+              if (data == null || data == "") {
+                return '<span class="badge-sunarp badge-sunarp-cyan">NO REGISTRADO</span>'
               }
               return data
             }
@@ -148,7 +152,7 @@ export class PersonalComponent implements OnInit {
         ],
         rowCallback: (row: Node, data: any[] | Object, index: number) => {
           $('.seleccionar_cliente', row).off().on('click', () => {
-           this.seleccionarCliente(data);
+            this.seleccionarCliente(data);
           });
           row.childNodes[0].textContent = String(index + 1);
           return row;
@@ -161,16 +165,38 @@ export class PersonalComponent implements OnInit {
         pagingType: 'full_numbers',
         pageLength: 10,
         responsive: true,
-        language: languageDataTable("Pagos pendientes Encontrados"),
+        language: languageDataTable("Entregas pendientes"),
         columns: [
           { data: 'id' },
-          { data: 'codigo' },
-          { data: 'estado' },
-          { data: 'porcentajePago' },
-          { data: 'montoPagadoInicial' },
-          { data: 'medioPago' },
-          { data: 'fechaCreacion' },
+          {
+            data: 'codigo', render: (data: any, type: any, full: any) => {
+              return '<span class="badge-sunarp badge-sunarp-gray-dark">'+data+'</span>'
+            }
+          },
+          {
+            data: 'montoTotal', render: (data: any, type: any, full: any) => {
+              return '<strong>' + this.valormonpipe.transform(data) + '</strong>'
+            }
+          },
+          {
+            data: 'montoPagadoInicial', render: (data: any, type: any, full: any) => {
+              return '<strong class="text-sunarp-cyan">' + this.valormonpipe.transform(data) + '</strong>'
+            }
+          },
+          {
+            data: 'pagado', render: (data: any, type: any, full: any) => {
+              if (data) {
+                return '<span class="badge-sunarp badge-sunarp-green">PAGADO</span>'
+              }
+              return '<span class="badge-sunarp badge-sunarp-red">PENDIENTE DE PAGO</span>'
+            }
+          },
           { data: 'fechaEntrega' },
+          {
+            data: 'entregado', render: (data: any, type: any, full: any) => {
+              return '<span class="badge-sunarp badge-sunarp-yellow">PENDIENTE DE ENTREGA</span>'
+            }
+          },
           { data: 'usuario' },
           {
             data: 'id', render: (data: any, type: any, full: any) => {
@@ -184,7 +210,7 @@ export class PersonalComponent implements OnInit {
         ],
         rowCallback: (row: Node, data: any[] | Object, index: number) => {
           $('.seleccionar_pago', row).off().on('click', () => {
-
+            this.mostrarEdicionPago(data);
           });
           row.childNodes[0].textContent = String(index + 1);
           return row;
@@ -199,7 +225,7 @@ export class PersonalComponent implements OnInit {
       this.datatable_dtTrigger_pago.next(this.datatable_pago);
     }, 200);
   }
-  convertirEnMayusculas(campo: string,form:FormGroup): void {
+  convertirEnMayusculas(campo: string, form: FormGroup): void {
     const valorActual = form.get(campo)?.value || '';
     form.get(campo)?.setValue(valorActual.toUpperCase(), { emitEvent: false });
   }
@@ -208,7 +234,7 @@ export class PersonalComponent implements OnInit {
     this.formCliente.get(campo)?.setValue(valorActual.toLowerCase(), { emitEvent: false });
   }
 
-  recargarTabla(index:number,list:any) {
+  recargarTabla(index: number, list: any) {
     let tabla_ren = this.dtElements._results[index].dtInstance;
     tabla_ren.then((dtInstance: DataTables.Api) => {
       dtInstance.search('').clear().rows.add(list).draw();
@@ -234,15 +260,15 @@ export class PersonalComponent implements OnInit {
       );
       return;
     }
-    this.listaCliente=[];
+    this.listaCliente = [];
     this.spinner.show();
     this.clienteService.buscarFiltro(this.formBusqueda.getRawValue()).subscribe(resp => {
-      if(resp.cod !=1){
+      if (resp.cod != 1) {
         alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
       }
-      else{
-        this.listaCliente=resp.list;
-        this.recargarTabla(0,this.listaCliente);
+      else {
+        this.listaCliente = resp.list;
+        this.recargarTabla(0, this.listaCliente);
       }
       this.spinner.hide();
     });
@@ -262,7 +288,7 @@ export class PersonalComponent implements OnInit {
   }
 
 
-  crearCliente(){
+  crearCliente() {
     this.formBusValid = true;
     if (this.formCliente.invalid) {
       return;
@@ -294,93 +320,102 @@ export class PersonalComponent implements OnInit {
     });
 
   }
-  listarServicio(){
+  listarServicio() {
     this.spinner.show();
     this.pagoService.listarServicios().subscribe(resp => {
-      this.listaServicios=resp;
+      this.listaServicios = resp;
       this.spinner.hide();
     });
   }
-  listarMedioPago(){
+  listarMedioPago() {
     this.spinner.show();
     this.pagoService.listarMedioPagos().subscribe(resp => {
-      this.listaMedioPago=resp;
+      this.listaMedioPago = resp;
       this.spinner.hide();
     });
   }
 
   buscarSubservicio(value) {
-    this.listaSubServicios=[];
+    this.listaSubServicios = [];
     this.fpa.subservicio.setValue(null);
-    if(value){
+    if (value) {
       this.spinner.show();
       this.pagoService.listarSubservicios(value).subscribe(resp => {
-          this.listaSubServicios=resp;
+        this.listaSubServicios = resp;
         this.spinner.hide();
       });
     }
   }
 
-  seleccionarCliente(data:any){
-    this.listaPago=[];
+  seleccionarCliente(data: any) {
+    this.listaPago = [];
     this.spinner.show();
     this.pagoService.listarPagosxCliente(data.id).subscribe(resp => {
-      this.clienteModel=data;
+      this.clienteModel = data;
       if (resp.cod === 1) {
-        this.listaPago=resp.list;
+        this.listaPago = resp.list;
       }
       if (resp.cod !== 1) {
         alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
       }
-      this.recargarTabla(1,this.listaPago);
+      this.recargarTabla(1, this.listaPago);
       this.spinner.hide();
     });
   }
-  retornarBusquedaCliente(){
-    this.clienteModel=null;
+
+  retornarBusquedaCliente() {
+    this.clienteModel = null;
   }
 
-  ejecutarAccion(tipo:number){
+  ejecutarAccion(tipo: number) {
+    this.tipoAccionPago=tipo;
+    this.sumaTotalPago = 0;
+    this.pagoModel=null;
+    this.porcentajeSumaTotal = null;
     this.listarServicio();
     this.listarMedioPago();
     this.limpiarFormularioPagos();
     this.modal_pago_va = this.modalservice.open(this.modal_pago, { ...this.modalOpciones, size: 'xl' });
   }
 
-  agregarPagoBoton(){
-    const subservicioid=this.fpa.subservicio.value;
-    if(subservicioid){
-      const subservicio=this.listaSubServicios.find(objeto => objeto["cod"] === subservicioid);
+  agregarPagoBoton() {
+    const subservicioid = this.fpa.subservicio.value;
+    if (subservicioid) {
+      const subservicio = this.listaSubServicios.find(objeto => objeto["cod"] === subservicioid);
+      subservicio.cantidad=null;
+      subservicio.montoTotal=null;
       this.agregarPagos(subservicio)
     }
 
   }
 
-  retornarDetalleText(control: AbstractControl):string{
-    const texto:string= this.getPagoFormGroup(control).get('tipo')?.value == '1' ?'POR ':'MARCA: ';
-    return texto+' '+this.getPagoFormGroup(control).get('detalleTipo')?.value
+  retornarDetalleText(control: AbstractControl): string {
+    const texto: string = this.getPagoFormGroup(control).get('tipo')?.value == '1' ? 'POR ' : 'MARCA: ';
+    return texto + ' ' + this.getPagoFormGroup(control).get('detalleTipo')?.value
   }
 
-  agregarPagos(data:any): void {
-    const categoriaPadre=this.listaServicios.find(objeto => objeto["cod"] === this.formPago.get("servicio")?.value).nombre;
-    const servicioExiste = this.listaPagos.value.some((pago: any) => pago.cod === data.cod);
-
-    if(servicioExiste){
-      alertNotificacion("El servicio "+categoriaPadre+" / "+data.nombre+" ya ha sido agregado","warning","Por favor agregar otro servicio");
-      return;
+  agregarPagos(data: any, nombreCategoriaPadre:boolean = true): void {
+    let categoriaPadre:string = null;
+    if(nombreCategoriaPadre){
+      categoriaPadre = this.listaServicios.find(objeto => objeto["cod"] === this.formPago.get("servicio")?.value).nombre;
+      const servicioExiste = this.listaPagos.value.some((pago: any) => pago.cod === data.cod);
+      if (servicioExiste) {
+        alertNotificacion("El servicio " + categoriaPadre + " / " + data.nombre + " ya ha sido agregado", "warning", "Por favor agregar otro servicio");
+        return;
+      }
     }
     this.fpa.montoPagado.setValue(null);
     const pagosFormGroup = this.fb.group({
       cod: new FormControl(data.cod),
-      nombre: new FormControl(categoriaPadre+" / "+data.nombre),
+      nombre: new FormControl( nombreCategoriaPadre?categoriaPadre + " / " + data.nombre:data.nombre),
       soloSeleccion: new FormControl(data.soloSeleccion),
       tipo: new FormControl(data.tipo),
       detalleTipo: new FormControl(data.detalleTipo),
       monto: new FormControl(data.monto.toFixed(2)),
-      cantidad: new FormControl({value:data.soloSeleccion?1:null,disabled:data.soloSeleccion},
+      cantidad: new FormControl({ value: data.soloSeleccion ? 1 : data.cantidad, disabled: data.soloSeleccion },
         [Validators.required]
       ),
-      montoTotal: new FormControl(data.soloSeleccion?data.monto.toFixed(2):null,
+      montoTotal: new FormControl(data.soloSeleccion ? data.monto.toFixed(2) : data.montoTotal,
         [Validators.required]),
     });
 
@@ -390,8 +425,8 @@ export class PersonalComponent implements OnInit {
       const total = cantidad && cantidad > 0 ? (monto * cantidad).toFixed(2) : null;
       pagosFormGroup.get('montoTotal')?.setValue(total);
     });
-    this.sumaTotalPago=0;
-    this.porcentajeSumaTotal=null;
+    this.sumaTotalPago = 0;
+    this.porcentajeSumaTotal = null;
     this.listaPagos.push(pagosFormGroup);
     this.fpa.servicio.setValue(null);
     this.buscarSubservicio(null);
@@ -418,66 +453,148 @@ export class PersonalComponent implements OnInit {
   }
 
   formatearMonto(input: string) {
-    this.porcentajeSumaTotal=null;
+    this.porcentajeSumaTotal = null;
     if (this.formPago.get(input)?.value) {
-      const porcentaje:number=(Number(this.formPago.get(input)?.value)*100)/this.sumaTotalPago;
-      if(porcentaje>0 && porcentaje<=100){
-        this.porcentajeSumaTotal=(new DecimalFormatPipe().transform(porcentaje));
+      const porcentaje: number = (Number(this.formPago.get(input)?.value) * 100) / this.sumaTotalPago;
+      if (porcentaje > 0 && porcentaje <= 100) {
+        this.porcentajeSumaTotal = (new DecimalFormatPipe().transform(porcentaje));
       }
       this.formPago.get(input)?.setValue(new DecimalFormatPipe().transform(this.formPago.get(input)?.value));
     }
   }
-  limpiarFormularioPagos(){
-    this.formPagoValid=false;
+  limpiarFormularioPagos() {
+    this.formPagoValid = false;
     this.formPago.patchValue({
       servicio: null,
       subservicio: null,
       medioPago: null,
-      fechaRecojo:  dayjs().format('YYYY-MM-DD'),
+      fechaRecojo: dayjs().format('YYYY-MM-DD'),
       montoPagado: null,
       observacion: null,
     });
     this.buscarSubservicio(null);
     this.listaPagos.clear();
   }
-  generarPagoTotal(){
-    this.formPagoValid=true;
-    if(this.formPago.invalid){
+  guardarPagoTotal() {
+    this.formPagoValid = true;
+    if (this.formPago.invalid) {
       return;
     }
-    const montoCliente=Number(this.fpa.montoPagado.value);
-    if(montoCliente>this.sumaTotalPago){
-      alertNotificacion("El monto ingresado por el cliente es superior al pago total","warning","Por favor ingresar un monto válido");
+    const montoCliente = Number(this.fpa.montoPagado.value);
+    if (montoCliente > this.sumaTotalPago) {
+      alertNotificacion("El monto ingresado por el cliente es superior al pago total", "warning", "Por favor ingresar un monto válido");
       return;
     }
-    else if (montoCliente<(this.sumaTotalPago*0.35)){
-      alertNotificacion("El monto ingresado por el cliente es menor al 35% del pago total","warning","Por favor ingresar un monto válido");
+    else if (montoCliente < (this.sumaTotalPago * 0.35)) {
+      alertNotificacion("El monto ingresado por el cliente es menor al 35% del pago total", "warning", "Por favor ingresar un monto válido");
       return;
     }
     const fechaHoy = dayjs();
-    if(dayjs(this.fpa.fechaRecojo.value).isBefore(fechaHoy, 'day')){
-      alertNotificacion("La fecha de recojo no puede ser antes de hoy","warning","Por favor ingresar una fecha válida");
+    if (dayjs(this.fpa.fechaRecojo.value).isBefore(fechaHoy, 'day')) {
+      alertNotificacion("La fecha de recojo no puede ser antes de hoy", "warning", "Por favor ingresar una fecha válida");
       return;
     }
-    Swal.fire({
-      icon: "warning",
-      title: '¿Desea generar la boleta por los siguientes servicios?',
-      text: "Previamente verificar si todos los datos son correctos",
-      confirmButtonText: '<span style="padding: 0 12px;">Sí, generar</span>',
-      showCancelButton: true,
-      cancelButtonText: 'No, cancelar',
-      cancelButtonColor: '#EB3219',
-      allowEnterKey: false,
-      allowEscapeKey: false,
-      allowOutsideClick: false,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const request=this.formPago.value;
-        (request as any).pagado = (this.sumaTotalPago);
+    if(this.tipoAccionPago == 1){
+      Swal.fire({
+        icon: "warning",
+        title: '¿Desea generar la boleta por los siguientes servicios?',
+        text: "Previamente verificar si todos los datos son correctos",
+        confirmButtonText: '<span style="padding: 0 12px;">Sí, generar</span>',
+        showCancelButton: true,
+        cancelButtonText: 'No, cancelar',
+        cancelButtonColor: '#EB3219',
+        allowEnterKey: false,
+        allowEscapeKey: false,
+        allowOutsideClick: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.spinner.show();
+          const request = {
+            ...this.formPago.value,
+            pagado: montoCliente === this.sumaTotalPago,
+            cliente: this.clienteModel.id,
+            montoTotal: this.sumaTotalPago,
+            porcentaje: this.porcentajeSumaTotal,
+          };
+          this.pagoService.generarBoleta(request).subscribe(resp => {
+            if (resp.cod === 1) {
+              this.modal_pago_va.close();
+              this.seleccionarCliente(this.clienteModel)
+            }
+            alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
+            this.spinner.hide();
+          });
 
-        console.log(request)
+        }
+      });
+    }
+    else{
+      Swal.fire({
+        icon: "warning",
+        title: '¿Desea editar la boleta '+this.pagoModel.codigo+'?',
+        text: "Previamente verificar si todos los datos son correctos",
+        confirmButtonText: '<span style="padding: 0 12px;">Sí, editar</span>',
+        showCancelButton: true,
+        cancelButtonText: 'No, cancelar',
+        cancelButtonColor: '#EB3219',
+        allowEnterKey: false,
+        allowEscapeKey: false,
+        allowOutsideClick: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.spinner.show();
+          const request = {
+            ...this.formPago.value,
+            pagado: montoCliente === this.sumaTotalPago,
+            cliente: this.clienteModel.id,
+            montoTotal: this.sumaTotalPago,
+            porcentaje: this.porcentajeSumaTotal,
+            id:this.pagoModel.id,
+            codigo:this.pagoModel.codigo
+          };
+          this.pagoService.edicionBoleta(request).subscribe(resp => {
+            if (resp.cod === 1) {
+              this.modal_pago_va.close();
+              this.seleccionarCliente(this.clienteModel)
+            }
+            alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
+            this.spinner.hide();
+          });
+        }
+      });
+    }
+
+
+  }
+
+
+  mostrarEdicionPago(data: any) {
+    this.spinner.show();
+    this.pagoService.obtenerPagoEdit(data.id).subscribe(resp => {
+      if (resp.cod === 1) {
+        this.ejecutarAccion(2);
+        this.pagoModel = resp.model;
+        this.sumaTotalPago=Number(this.pagoModel.montoTotal);
+        this.porcentajeSumaTotal=this.pagoModel.porcentajePago;
+        this.pagoModel.pago.forEach((item:any) => {
+          this.agregarPagos(item,false);
+        });
+        this.formPago.patchValue({
+          servicio: null,
+          subservicio: null,
+          medioPago: this.pagoModel.medioPagoId,
+          fechaRecojo:this.pagoModel.fechaEntrega,
+          montoPagado:this.pagoModel.montoPagadoInicial,
+          observacion: this.pagoModel.observacion,
+        });
+        setTimeout(() => {
+          this.formatearMonto('montoPagado')
+        }, 100);
       }
+      else {
+        alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
+      }
+      this.spinner.hide();
     });
-
   }
 }

@@ -364,3 +364,36 @@
     </div>
   </div>
 </ng-template>
+
+<ng-template #modal_ver_boleta let-c="close" let-d="dismiss">
+  <div class="modal-content">
+    <div class="modal-header bg-sunarp-gray-dark">
+      <h3 class="modal-title h3-sunarp text-white">BOLETA DE PAGO</h3>
+      <button tabindex="-1" type="button" class="close" aria-label="Close"
+        style="overflow:hidden; position: absolute; right: 30px; top: 3px;background-color: transparent;border: 0px;" (click)="modal_ver_boleta_va.close();">
+        <span style="font-size:35px !important;" class="text-white">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body pl-5 pb-4 pr-5 pt-4">
+      <ngx-extended-pdf-viewer
+      [base64Src]="contenidoBoletoVisor"
+      [zoom]="250"
+      [showToolbar]="false"
+      [showPresentationModeButton]="true"
+      [showDownloadButton]="true"
+      [showSecondaryToolbarButton]="false"
+      [showOpenFileButton]="false"
+      (pdfLoaded)="spinner.hide();"
+      class="pdf-viewer-custom"
+      >
+      </ngx-extended-pdf-viewer>
+    </div>
+    <div class="modal-footer d-flex justify-content-center">
+      <button  type="button" class="btn-sunarp-cyan"><i
+        class="fa fa-print icon-sunarp mr-2"></i>Imprimir</button>
+      <button (click)="modal_ver_boleta_va.close();" type="button" class="btn-sunarp-red"><i
+          class="fa fa-times icon-sunarp mr-2"></i>Salir</button>
+    </div>
+  </div>
+</ng-template>
+

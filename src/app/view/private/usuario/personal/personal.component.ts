@@ -26,7 +26,7 @@ export class PersonalComponent implements OnInit {
   constructor(
     private modalservice: NgbModal,
     private ref: ChangeDetectorRef,
-    private spinner: NgxSpinnerService,
+    public spinner: NgxSpinnerService,
     private clienteService: ClienteService,
     private customvalidator: FormValidationCustomService,
     private pagoService: PagoService,
@@ -86,6 +86,10 @@ export class PersonalComponent implements OnInit {
   }
   formBusValid: Boolean = false;
 
+  @ViewChild('modal_ver_boleta') modal_ver_boleta: NgbModalRef;
+  modal_ver_boleta_va: any;
+
+  contenidoBoletoVisor: any;
 
   formPago: FormGroup;
   get fpa() {
@@ -213,7 +217,7 @@ export class PersonalComponent implements OnInit {
             this.mostrarEdicionPago(data);
           });
           $('.imprimir_boleta', row).off().on('click', () => {
-
+            this.verBoleta(data);
           });
           row.childNodes[0].textContent = String(index + 1);
           return row;
@@ -567,9 +571,7 @@ export class PersonalComponent implements OnInit {
       });
     }
 
-
   }
-
 
   mostrarEdicionPago(data: any) {
     this.spinner.show();
@@ -593,6 +595,20 @@ export class PersonalComponent implements OnInit {
         setTimeout(() => {
           this.formatearMonto('montoPagado')
         }, 100);
+      }
+      else {
+        alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
+      }
+      this.spinner.hide();
+    });
+  }
+
+  verBoleta(data: any) {
+    this.spinner.show();
+    this.pagoService.imprimirBoleta(data.id).subscribe(resp => {
+      if (resp.cod === 1) {
+        this.contenidoBoletoVisor = String(resp.model)
+        this.modal_ver_boleta_va = this.modalservice.open(this.modal_ver_boleta, { ...this.modalOpciones, size: 'xl' });
       }
       else {
         alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);

@@ -69,7 +69,7 @@ export class ErrorInterceptor implements HttpInterceptor {
 
             }
             else{
-              Swal.fire({ icon: 'warning', title: 'Se ha producido un error inesperado en el '+environment.nameSystem, text:'Error: '+e.status, allowOutsideClick: false });
+              Swal.fire({ icon: 'warning', title: 'Se ha producido un error inesperado en '+environment.nameSystem, text:'Error: '+e.status, allowOutsideClick: false });
             }
           }
         }

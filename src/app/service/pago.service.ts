@@ -45,4 +45,9 @@ export class PagoService {
   edicionBoleta(data: any): Observable<any> {
     return this.http.post<any>(this.baseEndpoint + '/edicionBoleta', JSON.stringify(data))
   }
+  imprimirBoleta(pago: number): Observable<any> {
+    let params = new HttpParams();
+    params = params.append('pago', pago);
+    return this.http.get<any>(this.baseEndpoint + '/imprimirBoleta', { params: params })
+  }
 }

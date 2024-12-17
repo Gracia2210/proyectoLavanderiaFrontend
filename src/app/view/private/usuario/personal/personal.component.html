@@ -187,30 +187,32 @@
 <div [hidden]="clienteModel==null" class="lista-pagos">
   <button (click)="retornarBusquedaCliente()" type="button" class="btn-sunarp-red "><i class="fa fa-arrow-left icon-sunarp mr-2"></i>Regresar</button>
 
-  <form class="mt-3" [formGroup]="formBusquedaPagosPendientes" (ngSubmit)="seleccionarCliente(this.clienteModel)">
+  <form class="mt-3" [formGroup]="formBusquedaPagosPendientes" (ngSubmit)="listarPagosdeCliente(this.clienteModel)">
     <div class="row">
       <div class="col-lg-2 col-md-12 mt-2">
         <label class="label-sunarp">Estado</label>
-        <ng-select formControlName="tipo" bindLabel="nombre" bindValue="cod" placeholder="SELECCIONA">
+        <ng-select (change)="listarPagosdeCliente(this.clienteModel)"  [clearable]="false" formControlName="tipo" bindLabel="nombre" bindValue="cod" placeholder="SELECCIONA">
           <ng-option *ngFor="let item of listaTipoPago" [value]="item.cod">
             {{item.nombre}}</ng-option>
         </ng-select>
       </div>
       <div class="col-lg-3 col-md-12 mt-2">
         <label class="label-sunarp">Fecha Inicio</label>
-        <input formControlName="inicio" class="form-control-sunarp"
+        <input (blur)="listarPagosdeCliente(this.clienteModel)" formControlName="inicio" class="form-control-sunarp"
           type="date">
       </div>
       <div class="col-lg-3 col-md-12 mt-2">
         <label class="label-sunarp">Fecha Fin</label>
-        <input formControlName="fin" class="form-control-sunarp"
+        <input (blur)="listarPagosdeCliente(this.clienteModel)" formControlName="fin" class="form-control-sunarp"
           type="date">
       </div>
       <div class="col-lg-4 col-md-12 mt-2">
-        <button style="margin-top: 23px;margin-right: 10px;" type="submit" class="btn-sunarp-cyan btn-reload-tabla mr-2"><i
-            class="fa fa-search icon-sunarp"></i>Buscar</button>
-        <button (click)="ejecutarAccion(1)" type="button"
-            class="btn-sunarp-green"><i class="fa fa-shopping-cart icon-sunarp"></i>Nuevo</button>
+        <button style="margin-top: 23px;margin-right: 10px;" type="submit" class="btn-sunarp-green btn-reload-tabla mr-2"><i
+            class="fa fa-refresh icon-sunarp"></i>Refrescar</button>
+        <button style="margin-right: 10px;" *ngIf="this.formBusquedaPagosPendientes.value.tipo == '1'" (click)="ejecutarAccion(1)" type="button"
+            class="btn-sunarp-cyan"><i class="fa fa-shopping-cart icon-sunarp"></i>Nuevo</button>
+        <button (click)="listarPagosdeCliente(this.clienteModel,true)" type="button"
+            class="btn-sunarp-yellow"><i class="fa fa-eraser icon-sunarp"></i>Limpiar</button>
       </div>
     </div>
   </form>
@@ -250,7 +252,7 @@
       <h2 *ngIf="tipoAccionPago == 1" class="title-typ-devo text-center" style="font-size: 25px;">COTIZACIÓN Y <span
           class="text-sunarp-cyan">REGISTRO</span> DE SERVICIO
       </h2>
-      <h2 *ngIf="tipoAccionPago == 2 && pagoModel != null" class="title-typ-devo text-center" style="font-size: 25px;">EDICIÓN DE BOLETA <span
+      <h2 *ngIf="tipoAccionPago == 2 && pagoModel != null" class="title-typ-devo text-center" style="font-size: 25px;">{{desactivarInputsPago?'DATOS DE BOLETA ':'EDICIÓN DE BOLETA '}}<span
         class="text-sunarp-cyan">N° {{pagoModel.codigo}}</span>
        </h2>
       <div *ngIf="tipoAccionPago == 2 && pagoModel != null" class="w-100 mt-3 text-center">
@@ -259,8 +261,8 @@
       <form [formGroup]="formPago">
         <div class="row">
           <div class="col-md-12 col-lg-12">
-            <h5 class="mt-3 text-sunarp-cyan">Servicios Disponibles</h5>
-            <div class="row">
+            <h5 class="mt-3 text-sunarp-cyan">Servicios {{!desactivarInputsPago?'Disponibles':''}}</h5>
+            <div *ngIf="!desactivarInputsPago" class="row">
               <div class="col-lg-6 col-md-12 mt-2">
                 <label class="label-sunarp">Servicio</label>
                 <ng-select formControlName="servicio" (change)="buscarSubservicio($event)"  bindLabel="nombre" bindValue="cod" placeholder="SELECCIONA">
@@ -278,7 +280,7 @@
                 </ng-select>
               </div>
             </div>
-            <div class="w-100 mt-4 d-flex justify-content-center">
+            <div *ngIf="!desactivarInputsPago" class="w-100 mt-4 d-flex justify-content-center">
                 <button [disabled]="!fpa.subservicio.value" (click)="agregarPagoBoton()" type="button" class="btn-sunarp-green"><i
                 class="fa fa-plus icon-sunarp mr-2"></i>Agregar Servicio</button>
                 <button *ngIf="listaPagos.controls?.length == 0" style="margin-left: 10px;" (click)="modal_pago_va.close();" type="button" class="btn-sunarp-red"><i
@@ -297,7 +299,7 @@
                     <th class="text-center">Precio</th>
                     <th style="width: 50px;" class="text-center">Cantidad</th>
                     <th class="text-center">Monto</th>
-                    <th class="text-center">Acciones</th>
+                    <th *ngIf="!desactivarInputsPago" class="text-center">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -308,7 +310,7 @@
                     <td class="text-center fw-bold">
                       {{ getPagoFormGroup(pago).get('monto')?.value }}
                     </td>
-                    <td class="text-center" >
+                    <td *ngIf="!desactivarInputsPago" class="text-center" >
                       <input
                         digitOnly
                         formControlName="cantidad"
@@ -316,13 +318,16 @@
                         class="form-control-sunarp text-center"
                       />
                     </td>
+                    <td *ngIf="desactivarInputsPago" class="text-center" >
+                      {{ getPagoFormGroup(pago).get('cantidad')?.value }}
+                    </td>
                     <td class="text-center">{{ getPagoFormGroup(pago).get('montoTotal')?.value ?getPagoFormGroup(pago).get('montoTotal')?.value :'-'}}</td>
-                    <td class="text-center">
+                    <td *ngIf="!desactivarInputsPago" class="text-center">
                       <button class="btn-sunarp-red" (click)="eliminarPago(i)" ><li class="fa fa-trash"></li></button>
                     </td>
                   </tr>
                   <tr>
-                    <td colspan="6" class="text-end"><strong>Total:</strong></td>
+                    <td colspan="6" [attr.colspan]="desactivarInputsPago ? 5 : 6" class="text-end"><strong>Total:</strong></td>
                     <td class="text-center fw-bold">
                       <p class="text-right">
                         <strong></strong> {{ calcularSumaMontoTotal() }}
@@ -377,16 +382,15 @@
     <div *ngIf="listaPagos.controls?.length>0" class="modal-footer d-flex justify-content-center">
       <button *ngIf="tipoAccionPago == 1" (click)="guardarPagoTotal()" type="button" class="btn-sunarp-cyan"><i
           class="fa fa-ticket icon-sunarp mr-2"></i>Generar boleta</button>
-      <button *ngIf="tipoAccionPago == 2"  (click)="guardarPagoTotal()"  type="button" class="btn-sunarp-cyan"><i
+      <button *ngIf="tipoAccionPago == 2 &&!desactivarInputsPago"  (click)="guardarPagoTotal()"  type="button" class="btn-sunarp-cyan"><i
             class="fa fa-pencil icon-sunarp mr-2"></i>Editar boleta</button>
-      <button *ngIf="tipoAccionPago == 2"  (click)="guardarPagoTotal(true)"  type="button" class="btn-sunarp-green">
+      <button *ngIf="tipoAccionPago == 2 && !desactivarInputsPago"  (click)="guardarPagoTotal(true)"  type="button" class="btn-sunarp-green">
         <i class="fas fa-shipping-fast icon-sunarp mr-2"></i>Entregar Servicio</button>
       <button (click)="modal_pago_va.close();" type="button" class="btn-sunarp-red"><i
           class="fa fa-times icon-sunarp mr-2"></i>Salir</button>
     </div>
   </div>
 </ng-template>
-
 <ng-template #modal_ver_boleta let-c="close" let-d="dismiss">
   <div class="modal-content">
     <div class="modal-header bg-sunarp-gray-dark">

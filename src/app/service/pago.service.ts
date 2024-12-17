@@ -48,4 +48,10 @@ export class PagoService {
     params = params.append('pago', pago);
     return this.http.get<any>(this.baseEndpoint + '/imprimirBoleta', { params: params })
   }
+  anularPago(pago: number,codigo:string): Observable<any> {
+    let params = new HttpParams();
+    params = params.append('pago', pago);
+    params = params.append('codigo', codigo);
+    return this.http.get<any>(this.baseEndpoint + '/anularPago', { params: params })
+  }
 }

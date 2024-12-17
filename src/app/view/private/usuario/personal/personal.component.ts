@@ -111,18 +111,18 @@ export class PersonalComponent implements OnInit {
 
   datatable_pago: DataTables.Settings = {};
   datatable_dtTrigger_pago: Subject<ADTSettings> = new Subject<ADTSettings>();
-  listaTipoPago:any=[
+  listaTipoPago: any = [
     {
-      cod:"1",
-      nombre:"PENDIENTE"
+      cod: "1",
+      nombre: "PENDIENTE"
     },
     {
-      cod:"2",
-      nombre:"ENTREGADO"
+      cod: "2",
+      nombre: "ENTREGADO"
     },
     {
-      cod:"3",
-      nombre:"CANCELADO"
+      cod: "3",
+      nombre: "CANCELADO"
     }
   ];
   clienteModel: any = null;
@@ -133,7 +133,7 @@ export class PersonalComponent implements OnInit {
   listaSubServicios: any = [];
   tipoAccionPago: number;
   pagoModel: any = null;
-
+  desactivarInputsPago: boolean = false;
   formBusquedaPagosPendientes = new FormGroup({
     tipo: new FormControl("1"),
     inicio: new FormControl(""),
@@ -176,7 +176,7 @@ export class PersonalComponent implements OnInit {
         ],
         rowCallback: (row: Node, data: any[] | Object, index: number) => {
           $('.seleccionar_cliente', row).off().on('click', () => {
-            this.seleccionarCliente(data);
+            this.listarPagosdeCliente(data, true);
           });
           row.childNodes[0].textContent = String(index + 1);
           return row;
@@ -189,12 +189,12 @@ export class PersonalComponent implements OnInit {
         pagingType: 'full_numbers',
         pageLength: 10,
         responsive: true,
-        language: languageDataTable("Entregas pendientes"),
+        language: languageDataTable("pagos encontrados"),
         columns: [
           { data: 'id' },
           {
             data: 'codigo', render: (data: any, type: any, full: any) => {
-              return '<span class="badge-sunarp badge-sunarp-gray-dark">N° '+data+'</span>'
+              return '<span class="badge-sunarp badge-sunarp-gray-dark">N° ' + data + '</span>'
             }
           },
           {
@@ -209,6 +209,9 @@ export class PersonalComponent implements OnInit {
           },
           {
             data: 'pagado', render: (data: any, type: any, full: any) => {
+              if (full.cancelado == true) {
+                return '-'
+              }
               if (data) {
                 return '<span class="badge-sunarp badge-sunarp-green">PAGADO</span>'
               }
@@ -218,13 +221,21 @@ export class PersonalComponent implements OnInit {
           { data: 'fechaEntrega' },
           {
             data: 'entregado', render: (data: any, type: any, full: any) => {
+              if (full.cancelado == true) {
+                return '<span class="badge-sunarp badge-sunarp-red">CANCELADO</span>'
+              }
+              if (data) {
+                return '<span class="badge-sunarp badge-sunarp-green">ENTREGADO</span>'
+              }
               return '<span class="badge-sunarp badge-sunarp-yellow">PENDIENTE DE ENTREGA</span>'
             }
           },
           { data: 'usuario' },
           {
             data: 'id', render: (data: any, type: any, full: any) => {
-              return '<div class="btn-group"><button type="button" style ="margin-right:5px;" class="btn-sunarp-green seleccionar_pago mr-3"><i class="fa fa-edit" aria-hidden="true"></i></button><button type="button" style ="margin-right:5px;" class="btn-sunarp-gray-dark imprimir_boleta mr-3"><i class="fa fa-file" aria-hidden="true"></i></button></div>';
+              let icon: string = full.entregado == false && full.cancelado == false  ? 'edit' : 'eye';
+              let buttonDisable: string = full.entregado == false && full.cancelado == false ? '<button type="button" style ="margin-right:5px;" class="btn-sunarp-red anular_pago mr-3"><i class="fa fa-close" aria-hidden="true"></i></button>' : '';
+              return '<div class="btn-group"><button type="button" style ="margin-right:5px;" class="btn-sunarp-green seleccionar_pago mr-3"><i class="fa fa-' + icon + '" aria-hidden="true"></i></button><button type="button" style ="margin-right:5px;" class="btn-sunarp-gray-dark imprimir_boleta mr-3"><i class="fa fa-file" aria-hidden="true"></i></button>' + buttonDisable + '</div>';
             }
           },
         ],
@@ -238,6 +249,9 @@ export class PersonalComponent implements OnInit {
           });
           $('.imprimir_boleta', row).off().on('click', () => {
             this.verBoleta(data);
+          });
+          $('.anular_pago', row).off().on('click', () => {
+            this.anularPago(data);
           });
           row.childNodes[0].textContent = String(index + 1);
           return row;
@@ -338,7 +352,7 @@ export class PersonalComponent implements OnInit {
         this.clienteService.crear(formValues).subscribe(resp => {
           if (resp.cod === 1) {
             this.modal_ver_cliente_va.close();
-            this.seleccionarCliente(resp.model)
+            this.listarPagosdeCliente(resp.model)
           }
           alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
           this.spinner.hide();
@@ -374,34 +388,57 @@ export class PersonalComponent implements OnInit {
     }
   }
 
-  seleccionarCliente(data: any) {
+  listarPagosdeCliente(data: any, limpiarfiltro: boolean = false) {
+    if (limpiarfiltro) {
+      this.formBusquedaPagosPendientes.setValue({
+        tipo: "1",
+        inicio: dayjs().startOf('month').format('YYYY-MM-DD'),
+        fin: dayjs().endOf('month').format('YYYY-MM-DD')
+      });
+    }
     this.listaPago = [];
+    if (!(dayjs(this.formBusquedaPagosPendientes.value.inicio, 'YYYY-MM-DD', true).isValid()
+      && dayjs(this.formBusquedaPagosPendientes.value.fin, 'YYYY-MM-DD', true).isValid())) {
+     alertNotificacion("Debe ingresar la fecha de inicio y fin para continuar con este filtro", "warning", "Por favor verificar las fechas");
+     this.recargarTabla(1, this.listaPago);
+     return;
+   }
+   const fechaInicio = dayjs(this.formBusquedaPagosPendientes.value.inicio, 'YYYY-MM-DD', true);
+   const fechaFin = dayjs(this.formBusquedaPagosPendientes.value.fin, 'YYYY-MM-DD', true);
+
+   if (fechaInicio.isAfter(fechaFin)) {
+     alertNotificacion("La fecha de inicio no puede ser mayor a la fecha fin", "warning", "Por favor verificar las fechas");
+     this.recargarTabla(1, this.listaPago);
+     return;
+   }
+
     this.spinner.show();
-    this.pagoService.listarPagosxCliente({clienteId:data.id ,...this.formBusquedaPagosPendientes.value}).subscribe(resp => {
+    this.pagoService.listarPagosxCliente({ clienteId: data.id, ...this.formBusquedaPagosPendientes.value }).subscribe(resp => {
       this.clienteModel = data;
       if (resp.cod === 1) {
         this.listaPago = resp.list;
       }
-      if (resp.cod !== 1) {
+      if (resp.cod == -1) {
         alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
       }
+      if (resp.cod == 0 && limpiarfiltro) {
+        alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
+      }
+
       this.recargarTabla(1, this.listaPago);
       this.spinner.hide();
     });
   }
-
-
-
-
-
   retornarBusquedaCliente() {
     this.clienteModel = null;
   }
 
   ejecutarAccion(tipo: number) {
-    this.tipoAccionPago=tipo;
+    this.desactivarInputsPago = false;
+    this.formPago.enable();
+    this.tipoAccionPago = tipo;
     this.sumaTotalPago = 0;
-    this.pagoModel=null;
+    this.pagoModel = null;
     this.porcentajeSumaTotal = null;
     this.listarServicio();
     this.listarMedioPago();
@@ -413,8 +450,8 @@ export class PersonalComponent implements OnInit {
     const subservicioid = this.fpa.subservicio.value;
     if (subservicioid) {
       const subservicio = this.listaSubServicios.find(objeto => objeto["cod"] === subservicioid);
-      subservicio.cantidad=null;
-      subservicio.montoTotal=null;
+      subservicio.cantidad = null;
+      subservicio.montoTotal = null;
       this.agregarPagos(subservicio)
     }
 
@@ -425,9 +462,9 @@ export class PersonalComponent implements OnInit {
     return texto + ' ' + this.getPagoFormGroup(control).get('detalleTipo')?.value
   }
 
-  agregarPagos(data: any, nombreCategoriaPadre:boolean = true): void {
-    let categoriaPadre:string = null;
-    if(nombreCategoriaPadre){
+  agregarPagos(data: any, nombreCategoriaPadre: boolean = true): void {
+    let categoriaPadre: string = null;
+    if (nombreCategoriaPadre) {
       categoriaPadre = this.listaServicios.find(objeto => objeto["cod"] === this.formPago.get("servicio")?.value).nombre;
       const servicioExiste = this.listaPagos.value.some((pago: any) => pago.cod === data.cod);
       if (servicioExiste) {
@@ -438,7 +475,7 @@ export class PersonalComponent implements OnInit {
     this.fpa.montoPagado.setValue(null);
     const pagosFormGroup = this.fb.group({
       cod: new FormControl(data.cod),
-      nombre: new FormControl( nombreCategoriaPadre?categoriaPadre + " / " + data.nombre:data.nombre),
+      nombre: new FormControl(nombreCategoriaPadre ? categoriaPadre + " / " + data.nombre : data.nombre),
       soloSeleccion: new FormControl(data.soloSeleccion),
       tipo: new FormControl(data.tipo),
       detalleTipo: new FormControl(data.detalleTipo),
@@ -506,7 +543,7 @@ export class PersonalComponent implements OnInit {
     this.buscarSubservicio(null);
     this.listaPagos.clear();
   }
-  guardarPagoTotal(recojo:boolean = false) {
+  guardarPagoTotal(recojo: boolean = false) {
     this.formPagoValid = true;
     if (this.formPago.invalid) {
       return;
@@ -525,7 +562,7 @@ export class PersonalComponent implements OnInit {
       alertNotificacion("La fecha de recojo no puede ser antes de hoy", "warning", "Por favor ingresar una fecha válida");
       return;
     }
-    if(this.tipoAccionPago == 1){
+    if (this.tipoAccionPago == 1) {
       Swal.fire({
         icon: "warning",
         title: '¿Desea generar la boleta por los siguientes servicios?',
@@ -550,9 +587,9 @@ export class PersonalComponent implements OnInit {
           this.pagoService.generarBoleta(request).subscribe(resp => {
             if (resp.cod === 1) {
               this.modal_pago_va.close();
-              this.seleccionarCliente(this.clienteModel);
+              this.listarPagosdeCliente(this.clienteModel);
 
-              this.verBoleta({id:resp.model})
+              this.verBoleta({ id: resp.model })
             }
             alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
           });
@@ -560,13 +597,13 @@ export class PersonalComponent implements OnInit {
         }
       });
     }
-    else{
-      let textRecojo:string =(montoCliente !== this.sumaTotalPago) ?'Esta a punto de indicar que la boleta N° '+this.pagoModel.codigo+' ya ha sido pagada y el servicio entregado correctamente':'Esta a punto de indicar que el servicio de la boleta N° '+this.pagoModel.codigo+' ha sido entregado correctamente';
-      let textRecojoMsj:string="Recuerde que esta acción es permanente e indicará que la atención ya no se encuentra pendiente";
+    else {
+      let textRecojo: string = (montoCliente !== this.sumaTotalPago) ? 'Esta a punto de indicar que la boleta N° ' + this.pagoModel.codigo + ' ya ha sido pagada y el servicio entregado correctamente' : 'Esta a punto de indicar que el servicio de la boleta N° ' + this.pagoModel.codigo + ' ha sido entregado correctamente';
+      let textRecojoMsj: string = "Recuerde que esta acción es permanente e indicará que la atención ya no se encuentra pendiente";
       Swal.fire({
         icon: "warning",
-        title:recojo?textRecojo+'<br>¿Desea continuar?':'¿Desea continuar con la edición de la boleta '+this.pagoModel.codigo+'?',
-        text: recojo?textRecojoMsj:"Previamente verificar si todos los datos son correctos",
+        title: recojo ? textRecojo + '<br>¿Desea continuar?' : '¿Desea continuar con la edición de la boleta ' + this.pagoModel.codigo + '?',
+        text: recojo ? textRecojoMsj : "Previamente verificar si todos los datos son correctos",
         confirmButtonText: '<span style="padding: 0 12px;">Sí, continuar</span>',
         showCancelButton: true,
         cancelButtonText: 'No, cancelar',
@@ -580,22 +617,22 @@ export class PersonalComponent implements OnInit {
           const request = {
             ...this.formPago.value,
             pagado: (montoCliente === this.sumaTotalPago) || recojo,
-            entregado:recojo,
+            entregado: recojo,
             cliente: this.clienteModel.id,
             montoTotal: this.sumaTotalPago,
             porcentaje: this.porcentajeSumaTotal,
-            id:this.pagoModel.id,
-            codigo:this.pagoModel.codigo
+            id: this.pagoModel.id,
+            codigo: this.pagoModel.codigo
           };
-          if(recojo){
-            request.montoPagado=this.sumaTotalPago;
+          if (recojo) {
+            request.montoPagado = this.sumaTotalPago;
           }
           this.pagoService.edicionBoleta(request).subscribe(resp => {
             if (resp.cod === 1) {
               this.modal_pago_va.close();
-              this.seleccionarCliente(this.clienteModel);
-              if(recojo){
-                this.verBoleta({id:this.pagoModel.id})
+              this.listarPagosdeCliente(this.clienteModel);
+              if (recojo) {
+                this.verBoleta({ id: this.pagoModel.id })
               }
             }
             alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
@@ -612,23 +649,33 @@ export class PersonalComponent implements OnInit {
     this.pagoService.obtenerPagoEdit(data.id).subscribe(resp => {
       if (resp.cod === 1) {
         this.ejecutarAccion(2);
+        this.desactivarInputsPago = data.entregado == true || data.cancelado == true;
         this.pagoModel = resp.model;
-        this.sumaTotalPago=Number(this.pagoModel.montoTotal);
-        this.porcentajeSumaTotal=this.pagoModel.porcentajePago;
-        this.pagoModel.pago.forEach((item:any) => {
-          this.agregarPagos(item,false);
+        this.sumaTotalPago = Number(this.pagoModel.montoTotal);
+        this.porcentajeSumaTotal = this.pagoModel.porcentajePago;
+        this.pagoModel.pago.forEach((item: any) => {
+          this.agregarPagos(item, false);
         });
         this.formPago.patchValue({
           servicio: null,
           subservicio: null,
           medioPago: this.pagoModel.medioPagoId,
-          fechaRecojo:this.pagoModel.fechaEntrega,
-          montoPagado:this.pagoModel.montoPagadoInicial,
+          fechaRecojo: this.pagoModel.fechaEntrega,
+          montoPagado: this.pagoModel.montoPagadoInicial,
           observacion: this.pagoModel.observacion,
         });
+        if (this.desactivarInputsPago) {
+          const camposADeshabilitar = ['servicio', 'subservicio', 'medioPago', 'fechaRecojo', 'observacion', 'montoPagado'];
+          Object.keys(this.formPago.controls).forEach((key) => {
+            if (camposADeshabilitar.includes(key)) {
+              this.formPago.get(key)?.disable();
+            }
+          });
+        }
         setTimeout(() => {
-          this.formatearMonto('montoPagado')
+          this.formatearMonto('montoPagado');
         }, 100);
+        this.ref.detectChanges();
       }
       else {
         alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
@@ -652,7 +699,7 @@ export class PersonalComponent implements OnInit {
   }
 
   imprimirBoleta() {
-    this.converBase64Pdf(this.contenidoBoletoVisor,250);
+    this.converBase64Pdf(this.contenidoBoletoVisor, 250);
   }
 
   converBase64Pdf(data: string, zoom: number = 100) {
@@ -674,5 +721,32 @@ export class PersonalComponent implements OnInit {
       window.open(fileWithZoom, '_blank');
     }
   }
+  anularPago(data) {
+    Swal.fire({
+      icon: "warning",
+      title: "¿Desea anular la boleta N° " + data.codigo + "?",
+      text: "Esta procedimiento es permanente por lo que se recomienda verificar",
+      confirmButtonText: '<span style="padding: 0 12px;">Sí, anular</span>',
+      showCancelButton: true,
+      cancelButtonText: 'No, cancelar',
+      cancelButtonColor: '#EB3219',
+      allowEnterKey: false,
+      allowEscapeKey: false,
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.spinner.show();
+        this.pagoService.anularPago(data.id, data.codigo).subscribe(resp => {
+          if (resp.cod === 1) {
+            this.listarPagosdeCliente(this.clienteModel);
+          }
+          alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
+          this.spinner.hide();
+        });
+      }
+    });
 
+
+
+  }
 }

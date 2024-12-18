@@ -496,8 +496,8 @@ export class PersonalComponent implements OnInit {
     this.sumaTotalPago = 0;
     this.porcentajeSumaTotal = null;
     this.listaPagos.push(pagosFormGroup);
-    this.fpa.servicio.setValue(null);
-    this.buscarSubservicio(null);
+    //this.fpa.servicio.setValue(null);
+   // this.buscarSubservicio(null);
   }
 
 

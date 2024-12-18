@@ -1,3 +1,80 @@
-<p>
-  gestion-clientes works!
-</p>
+<h3 class="mt-4 mb-4 h3-sunarp">Módulo de Gestión de Cliente</h3>
+<div class="row mb-4">
+  <div class="col-md-12 col-lg-12">
+    <form [formGroup]="formBusqueda" (ngSubmit)="buscar()">
+      <div class="row">
+        <div class="col-lg-3 col-md-12 mt-2">
+          <label class="label-sunarp">Fecha Inicio</label>
+          <input formControlName="inicio" class="form-control-sunarp text-uppercase" type="date">
+        </div>
+        <div class="col-lg-3 col-md-12 mt-2">
+          <label class="label-sunarp">Fecha Fin</label>
+          <input formControlName="fin" class="form-control-sunarp text-uppercase" type="date">
+        </div>
+        <div class="col-lg-6 col-md-12 mt-2">
+          <div class="w-100 mt-4">
+            <button [disabled]="formBusqueda.invalid" style="margin-right: 15px;" type="submit" class="btn-sunarp-green btn-reload-tabla"><i
+                class="fa fa-search icon-sunarp"></i>Buscar</button>
+            <button  (click)="limpiar()" type="button" class="btn-sunarp-yellow mr-2"><i
+                class="fa fa-refresh icon-sunarp"></i>Limpiar</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="row mb-4 fondo">
+  <div class="col-md-12 col-lg-12">
+    <div class="row mt-5">
+      <div class="col-lg-6 col-md-12 mt-2">
+        <highcharts-chart [Highcharts]="HighchartsPrimero" [options]="chartOptionsPrimero"
+          style="width: 100%; height: 400px; display: block;"></highcharts-chart>
+
+      </div>
+      <div class="col-lg-6 col-md-12 mt-2">
+        <highcharts-chart [Highcharts]="HighchartsSegundo" [options]="chartOptionsSegundo"
+          style="width: 100%; height: 400px; display: block;"></highcharts-chart>
+      </div>
+    </div>
+    <div class="row mt-5">
+      <div class="col-lg-6 col-md-12 mt-2">
+        <highcharts-chart [Highcharts]="HighchartsTercero" [options]="chartOptionsTercero"
+          style="width: 100%; height: 400px; display: block;"></highcharts-chart>
+      </div>
+      <div class="col-lg-6 col-md-12 mt-2">
+        <highcharts-chart [Highcharts]="HighchartsCuarto" [options]="chartOptionsCuarto"
+          style="width: 100%; height: 400px; display: block;"></highcharts-chart>
+      </div>
+    </div>
+    <div class="row mt-5">
+      <div class="col-lg-6 col-md-12 mt-2">
+        <highcharts-chart [Highcharts]="HighchartsQuinto" [options]="chartOptionsQuinto"
+          style="width: 100%; height: 400px; display: block;"></highcharts-chart>
+      </div>
+      <div class="col-lg-6 col-md-12 mt-2">
+        <highcharts-chart [Highcharts]="HighchartsSexto" [options]="chartOptionsSexto"
+          style="width: 100%; height: 400px; display: block;"></highcharts-chart>
+      </div>
+    </div>
+  </div>
+</div>
+<h3 class="mt-4 mb-4 h3-sunarp">Reporte de Deudas o Pagos Pendientes</h3>
+<div class="mt-2">
+  <div class="table-responsive">
+    <table datatable class="table thead-sunarp" datatable [dtOptions]="datatable_deudores"
+      [dtTrigger]="datatable_dtTrigger_deudores">
+      <thead>
+        <tr>
+          <th style="width: 30px" class="text-center">N°</th>
+          <th class="text-center">N° Boleta</th>
+          <th class="text-center">Cliente</th>
+          <th class="text-center">Deuda</th>
+          <th class="text-center">Fecha Recojo</th>
+          <th class="text-center">Opciones</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+</div>

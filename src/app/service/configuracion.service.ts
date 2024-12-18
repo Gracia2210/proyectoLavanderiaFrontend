@@ -35,5 +35,10 @@ export class ConfiguracionService {
     params = params.append('idArchivo', idArchivo);
     return this.http.get<any>(this.baseEndpoint + '/obtenerImagen', { params: params })
   }
- 
+  listarSecuencia(): Observable<any> {
+    return this.http.get<any>(this.baseEndpoint + '/listarSecuencia')
+  }
+  editarSecuencia(data: any): Observable<any> {
+    return this.http.post<any>(this.baseEndpoint + '/editarSecuencia', JSON.stringify(data))
+  }
 }

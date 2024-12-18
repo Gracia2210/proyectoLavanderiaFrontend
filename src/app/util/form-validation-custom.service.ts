@@ -36,6 +36,24 @@ export class FormValidationCustomService {
     };
   }
 
+  validatorInteger(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+
+      if (value === null || value === undefined || value === '') {
+        return null;
+      }
+      const integerRegex = /^(0|[1-9]\d*)$/;
+      const isValid = integerRegex.test(value);
+
+      if (!isValid) {
+        return { 'validarIntegerPuro': true };
+      }
+
+      return null;
+    };
+  }
+
   ValidateRucLenght(control: AbstractControl): { [key: string]: any } | null {
     let data = control.value as string;
     if (data != null || data != undefined) {

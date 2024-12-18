@@ -20,6 +20,24 @@
     </table>
   </div>
 </div>
+<h3 class="mt-4 mb-4 h3-sunarp">Administrar Serie y Secuencia de N° de Boleta</h3>
+<div class="mt-2">
+  <div class="table-responsive">
+    <table datatable class="table thead-sunarp" datatable [dtOptions]="datatable_secuencia"
+      [dtTrigger]="datatable_dtTrigger_secuencia">
+      <thead>
+        <tr>
+          <th style="width: 30px" class="text-center">N°</th>
+          <th class="text-center">N° Serie</th>
+          <th class="text-center">N° de Secuencia</th>
+          <th class="text-center">Opciones</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+</div>
 <h3 class="mt-4 mb-4 h3-sunarp">Administrar Servicios en el Sistema</h3>
 <div class="w-100 mt-4">
   <button (click)="listarServicios()" style="margin-right: 20px;" type="button" class="btn-sunarp-green"><i
@@ -291,6 +309,61 @@
       <button (click)="guardarConfiguracionSistema()" type="button" class="btn-sunarp-cyan"><i
           class="fa fa-pencil icon-sunarp mr-2"></i>Editar Configuración</button>
       <button (click)="modal_edit_config_va.close();" type="button" class="btn-sunarp-red"><i
+          class="fa fa-times icon-sunarp mr-2"></i>Salir</button>
+    </div>
+  </div>
+</ng-template>
+
+
+<ng-template #modal_edit_secuencia let-c="close" let-d="dismiss">
+  <div class="modal-content">
+    <div class="modal-header bg-sunarp-gray-dark">
+      <h3 class="modal-title h3-sunarp text-white">CONFIGURACIÓN</h3>
+      <button tabindex="-1" type="button" class="close" aria-label="Close"
+        style="overflow:hidden; position: absolute; right: 30px; top: 1px;background-color: transparent;border: 0px;"
+        (click)="modal_edit_secuencia_va.close();">
+        <span aria-hidden="true" style="font-size:35px !important;" class="text-white">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body pl-5 pb-4 pr-5 pt-4">
+      <h2 class="title-typ-devo text-center" style="font-size: 20px;">EDITAR <span class="text-sunarp-cyan">
+          CONFIGURACIÓN</span>
+      </h2>
+      <form [formGroup]="formSecuencia">
+        <div class="row">
+          <div class="col-md-12 col-lg-12">
+            <div class="row">
+              <div class="col-lg-12 col-md-12 mt-2">
+                <label class="label-sunarp">Serie (Max:6 Carácteres)</label>
+                <input formControlName="serie" maxlength="250" type="text" class="form-control-sunarp">
+                <small *ngIf="formSecuenciaValid && fsecu.serie.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+                  <small *ngIf="formSecuenciaValid && fsecu.serie.errors?.maxlength"
+                  class="invalid-feedback-sunarp p-0 mt-2">La serie solo debe tener máximo 6 carácteres</small>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-12 col-md-12 mt-2">
+                <label class="label-sunarp">Secuencia (Max:6 dígitos)</label>
+                <input digitOnly formControlName="secuencia" maxlength="250" type="text" class="form-control-sunarp">
+                <small *ngIf="formSecuenciaValid && fsecu.secuencia.errors?.required"
+                  class="invalid-feedback-sunarp p-0 mt-2">Este campo es requerido</small>
+                  <small *ngIf="formSecuenciaValid && fsecu.secuencia.errors?.maxlength"
+                  class="invalid-feedback-sunarp p-0 mt-2">La secuencia solo debe tener máximo 6 dígitos</small>
+                  <small *ngIf="formSecuenciaValid && fsecu.secuencia.errors?.validarNumeroMayorZero && fsecu.secuencia.errors?.required == null && fsecu.secuencia.errors?.maxlength == null"
+                  class="invalid-feedback-sunarp p-0 mt-2">La secuencia solo debe ser mayor a 0</small>
+                  <small *ngIf="formSecuenciaValid && fsecu.secuencia.errors?.validarIntegerPuro && fsecu.secuencia.errors?.required == null && fsecu.secuencia.errors?.maxlength == null && fsecu.secuencia.errors?.validarNumeroMayorZero == null"
+                  class="invalid-feedback-sunarp p-0 mt-2">La secuencia no es valida</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer d-flex justify-content-center">
+      <button (click)="guardarDatosSecuencia()" type="button" class="btn-sunarp-cyan"><i
+          class="fa fa-pencil icon-sunarp mr-2"></i>Editar Serie y/o Secuencia</button>
+      <button (click)="modal_edit_secuencia_va.close();" type="button" class="btn-sunarp-red"><i
           class="fa fa-times icon-sunarp mr-2"></i>Salir</button>
     </div>
   </div>

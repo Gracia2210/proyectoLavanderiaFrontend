@@ -8,10 +8,11 @@ import { CreacionUsuarioComponent } from './admin/funciones-administrativas/crea
 import { PersonalComponent } from './personal/personal.component';
 import { CreacionClienteComponent } from './admin/funciones-administrativas/creacion-cliente/creacion-cliente.component';
 import { CreacionServiciosComponent } from './admin/funciones-administrativas/creacion-servicios/creacion-servicios.component';
+import { GestionClientesComponent } from './admin/funciones-administrativas/gestion-clientes/gestion-clientes.component';
 
 
 @NgModule({
-  declarations: [UsuarioComponent,PersonalComponent, FuncionesAdministrativasComponent, CreacionUsuarioComponent,CreacionClienteComponent,CreacionServiciosComponent
+  declarations: [UsuarioComponent,PersonalComponent, FuncionesAdministrativasComponent, CreacionUsuarioComponent,CreacionClienteComponent,CreacionServiciosComponent,GestionClientesComponent
   ],
   imports: [
     CommonModule,

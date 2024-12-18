@@ -352,7 +352,7 @@ export class PersonalComponent implements OnInit {
         this.clienteService.crear(formValues).subscribe(resp => {
           if (resp.cod === 1) {
             this.modal_ver_cliente_va.close();
-            this.listarPagosdeCliente(resp.model)
+            this.listarPagosdeCliente(resp.model,true)
           }
           alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
           this.spinner.hide();
@@ -724,7 +724,7 @@ export class PersonalComponent implements OnInit {
   anularPago(data) {
     Swal.fire({
       icon: "warning",
-      title: "¿Desea anular la boleta N° " + data.codigo + "?",
+      title: "¿Desea cancelar la boleta N° " + data.codigo + "?",
       text: "Esta procedimiento es permanente por lo que se recomienda verificar",
       confirmButtonText: '<span style="padding: 0 12px;">Sí, anular</span>',
       showCancelButton: true,

@@ -102,10 +102,19 @@ export class CreacionServiciosComponent implements OnInit {
 
   datatable_dtTrigger_configuracion: Subject<ADTSettings> = new Subject<ADTSettings>();
 
+  datatable_secuencia: DataTables.Settings = {};
+
+  datatable_dtTrigger_secuencia: Subject<ADTSettings> = new Subject<ADTSettings>();
+
   listaConfiguracion: any = [];
+
+  listaSecuencia: any = [];
 
   @ViewChild('modal_edit_config') modal_edit_config: NgbModalRef;
   modal_edit_config_va: any;
+
+  @ViewChild('modal_edit_secuencia') modal_edit_secuencia: NgbModalRef;
+  modal_edit_secuencia_va: any;
 
   formConfiguracion = new FormGroup({
     id: new FormControl(""),
@@ -120,6 +129,17 @@ export class CreacionServiciosComponent implements OnInit {
   formConfiguracionValid: Boolean = false;
   selectedFileConfiguracion: File | null = null;
 
+  formSecuencia = new FormGroup({
+    serie: new FormControl("", [Validators.required,Validators.maxLength(6)]),
+    secuencia: new FormControl("", [Validators.required,Validators.maxLength(6),this.customvalidator.validarNumeroMayorZero(),this.customvalidator.validatorInteger()])
+  });
+
+  get fsecu() {
+    return this.formSecuencia.controls;
+  }
+  formSecuenciaValid: Boolean = false;
+
+
   ngOnInit() {
     setTimeout(() => {
 
@@ -131,7 +151,7 @@ export class CreacionServiciosComponent implements OnInit {
         columns: [
           { data: 'id' },
           { data: 'nombre' },
-          { data: 'descripcion' },         
+          { data: 'descripcion' },
           { data: 'direccion' },
           { data: 'telefono' },
           {
@@ -159,6 +179,35 @@ export class CreacionServiciosComponent implements OnInit {
           $('.image_config', row).off().on('click', () => {
             this.mostrarImagenConfiguracion(data);
           });
+          row.childNodes[0].textContent = String(index + 1);
+          return row;
+        }
+      }
+
+      this.datatable_secuencia = {
+        dom: '<"top">rt<"bottom"><"clear">',
+        paging: false,
+        responsive: true,
+        language: languageDataTable("Servicios"),
+        columns: [
+          { data: 'idSerie' },
+          { data: 'serie' },
+          { data: 'secuencia' },
+          {
+            data: 'id', render: (data: any, type: any, full: any) => {
+              return '<div class="btn-group"><button type="button" style ="margin-right:5px;" class="btn-sunarp-cyan edit_secuencia mr-3"><i class="fa fa-pencil" aria-hidden="true"></i></button></div>';
+            }
+          },
+        ],
+        columnDefs: [
+          { orderable: false, className: "text-center align-middle", targets: 0, },
+          { className: "text-center align-middle", targets: '_all' }
+        ],
+        rowCallback: (row: Node, data: any[] | Object, index: number) => {
+          $('.edit_secuencia', row).off().on('click', () => {
+            this.editarSecuencias(data);
+          });
+
           row.childNodes[0].textContent = String(index + 1);
           return row;
         }
@@ -265,11 +314,13 @@ export class CreacionServiciosComponent implements OnInit {
 
   ngAfterViewInit() {
     setTimeout(() => {
-      this.datatable_dtTrigger_configuracion.next(this.datatable_configuracion);     
+      this.datatable_dtTrigger_configuracion.next(this.datatable_configuracion);
       this.datatable_dtTrigger_servicios.next(this.datatable_servicios);
+      this.datatable_dtTrigger_secuencia.next(this.datatable_secuencia);
       this.datatable_dtTrigger_subservicio.next(this.datatable_subservicio);
       this.listarServicios();
       this.listarConfiguracion();
+      this.listarSecuencias();
     }, 200);
   }
 
@@ -289,6 +340,23 @@ export class CreacionServiciosComponent implements OnInit {
     });
   }
 
+  listarSecuencias() {
+    this.spinner.show();
+    this.listaSecuencia = [];
+    this.configuracionService.listarSecuencia().subscribe(resp => {
+      if (resp.cod == 1) {
+        this.listaSecuencia = resp.list;
+      }
+      if(resp.cod == -1){
+        alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
+      }
+      this.recargarTabla(1,this.listaSecuencia);
+      this.spinner.hide();
+    });
+  }
+
+
+
   listarServicios() {
     this.spinner.show();
     this.listaServicios=[];
@@ -301,7 +369,7 @@ export class CreacionServiciosComponent implements OnInit {
       if(resp.cod == -1){
         alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
       }
-      this.recargarTabla(1,this.listaServicios);
+      this.recargarTabla(2,this.listaServicios);
       this.spinner.hide();
     });
   }
@@ -421,7 +489,7 @@ export class CreacionServiciosComponent implements OnInit {
       if (resp.cod === 1) {
         this.listaSubServicios=resp.list;
       }
-      this.recargarTabla(2,this.listaSubServicios);
+      this.recargarTabla(3,this.listaSubServicios);
       this.formServicioEditValid=false;
       this.formServiciosEdit.setValue({
         descripcion: this.servicioModel.descripcion
@@ -437,7 +505,7 @@ export class CreacionServiciosComponent implements OnInit {
         if (resp.cod === 1) {
           this.listaSubServicios=resp.list;
         }
-        this.recargarTabla(2,this.listaSubServicios);
+        this.recargarTabla(3,this.listaSubServicios);
         this.spinner.hide();
       });
     }
@@ -623,7 +691,7 @@ export class CreacionServiciosComponent implements OnInit {
     if(this.formConfiguracion.invalid){
       return;
     }
-    
+
     Swal.fire({
       icon: "warning",
       title: "¿Desea modificar los datos de la configuración de Sistema?",
@@ -661,19 +729,19 @@ export class CreacionServiciosComponent implements OnInit {
       const len = binary.length;
       const buffer = new ArrayBuffer(len);
       const view = new Uint8Array(buffer);
-  
+
       for (let i = 0; i < len; i++) {
         view[i] = binary.charCodeAt(i);
       }
-  
+
       const file = new Blob([view], { type: 'image/jpeg' });
       const fileURL = URL.createObjectURL(file);
-  
+
       // Abrir la imagen JPG en una nueva ventana o pestaña
       window.open(fileURL, '_blank');
     }
   }
-  
+
   mostrarImagenConfiguracion(data){
     this.spinner.show();
     this.configuracionService.obtenerImagen(data.id).subscribe(resp => {
@@ -684,6 +752,49 @@ export class CreacionServiciosComponent implements OnInit {
        this.convertBase64ToJpg(resp.model);
       }
       this.spinner.hide();
+    });
+  }
+
+
+  editarSecuencias(data){
+    this.formSecuenciaValid=false;
+    this.formSecuencia.patchValue({
+      serie:data.serie,
+      secuencia:data.secuencia,
+    });
+    this.modal_edit_secuencia_va = this.modalservice.open(this.modal_edit_secuencia, { ...this.modalOpciones });
+  }
+
+  guardarDatosSecuencia(){
+    this.formSecuenciaValid=true;
+    if(this.formSecuencia.invalid){
+      return;
+    }
+    Swal.fire({
+      icon: "warning",
+      title: "¿Desea modifica la serie y/o secuencia de la boleta del sistema?",
+      text: "Recuerde que este cambio es reversible; sin embargo, se recomienda verificar el número actual de boletas y asegurarse de que no exista ningún problema con la información",
+      confirmButtonText: '<span style="padding: 0 12px;">Sí, modificar</span>',
+      showCancelButton: true,
+      cancelButtonText: 'No, cancelar',
+      cancelButtonColor: '#EB3219',
+      allowEnterKey: false,
+      allowEscapeKey: false,
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const formValues = this.formSecuencia.getRawValue();
+        this.spinner.show();
+        this.configuracionService.editarSecuencia(formValues).subscribe(resp => {
+          if (resp.cod === 1) {
+            this.modal_edit_secuencia_va.close();
+            this.listarSecuencias();
+          }
+          alertNotificacion(resp.mensaje, resp.icon, resp.mensajeTxt);
+          this.spinner.hide();
+        });
+
+      }
     });
   }
 

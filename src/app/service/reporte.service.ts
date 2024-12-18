@@ -35,4 +35,23 @@ export class ReporteService {
   listarDeudores(data: any): Observable<any> {
     return this.http.post<any>(this.baseEndpoint + '/listarDeudores', JSON.stringify(data))
   }
+  exportarReportesPDF(request: any): Observable<any> {
+    return this.http.post(
+      this.baseEndpoint + '/exportarReportesPDF',
+      request,
+      {
+        responseType: 'text',
+      }
+    );
+  }
+
+  exportarReportesExcel(request: any): Observable<Blob> {
+    return this.http.post(
+      this.baseEndpoint + '/exportarReportesExcel',
+      request,
+      {
+        responseType: 'blob',
+      }
+    );
+  }
 }

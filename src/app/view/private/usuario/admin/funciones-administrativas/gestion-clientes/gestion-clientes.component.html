@@ -13,9 +13,9 @@
         </div>
         <div class="col-lg-6 col-md-12 mt-2">
           <div class="w-100 mt-4">
-            <button [disabled]="formBusqueda.invalid" style="margin-right: 15px;" type="submit" class="btn-sunarp-green btn-reload-tabla"><i
-                class="fa fa-search icon-sunarp"></i>Buscar</button>
-            <button  (click)="limpiar()" type="button" class="btn-sunarp-yellow mr-2"><i
+            <button [disabled]="formBusqueda.invalid" style="margin-right: 15px;" type="submit"
+              class="btn-sunarp-green btn-reload-tabla"><i class="fa fa-search icon-sunarp"></i>Buscar</button>
+            <button (click)="limpiar()" type="button" class="btn-sunarp-yellow mr-2"><i
                 class="fa fa-refresh icon-sunarp"></i>Limpiar</button>
           </div>
         </div>
@@ -59,6 +59,10 @@
   </div>
 </div>
 <h3 class="mt-4 mb-4 h3-sunarp">Reporte de Deudas o Pagos Pendientes</h3>
+<div *ngIf="listaMedioPago?.length>0" class="w-100">
+  <button (click)="confirmarGenerarInforme('1', '7')" type="button" class="btn-sunarp-red mr-2"><i class="fa fa-file-pdf-o icon-sunarp"></i>Exportar a PDF</button>
+  <button (click)="confirmarGenerarInforme('2', '7')" style="margin-left: 10px;" type="button" class="btn-sunarp-green mr-2"><i class="fa fa-file-excel-o icon-sunarp"></i>Exportar a Excel</button>
+</div>
 <div class="mt-2">
   <div class="table-responsive">
     <table datatable class="table thead-sunarp" datatable [dtOptions]="datatable_deudores"
@@ -78,3 +82,133 @@
     </table>
   </div>
 </div>
+
+
+<ng-template #modal_pago let-c="close" let-d="dismiss">
+  <div class="modal-content">
+    <div class="modal-header bg-sunarp-gray-dark">
+      <h3 class="modal-title h3-sunarp text-white">DATOS DE LA BOLETA</h3>
+      <button tabindex="-1" type="button" class="close" aria-label="Close"
+        style="overflow:hidden; position: absolute; right: 30px; top: 1px;background-color: transparent;border: 0px;"
+        (click)="modal_pago_va.close();">
+        <span aria-hidden="true" style="font-size:35px !important;" class="text-white">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body pl-5 pb-4 pr-5 pt-4">
+      <h2 class="title-typ-devo text-center" style="font-size: 25px;">DATOS DE BOLETA <span class="text-sunarp-cyan">N°
+          {{pagoModel.codigo}}</span>
+      </h2>
+      <div class="w-100 mt-3 text-center">
+        <span><strong>Fecha de Creación: </strong>{{pagoModel.fechaCreacion}}</span>
+      </div>
+      <form [formGroup]="formPago">
+        <div class="row">
+          <div class="col-md-12 col-lg-12">
+            <h5 class="mt-3 text-sunarp-cyan">Servicios</h5>
+            <div [hidden]="listaPagos.controls?.length==0" class="table-responsive mt-4">
+              <table class="table table-soli-devo row-focus w-100">
+                <thead>
+                  <tr>
+                    <th style="width: 30px" class="text-center">N°</th>
+                    <th style="width: 300px;" class="text-center">Descripción</th>
+                    <th class="text-center">Detalle</th>
+                    <th class="text-center">Precio</th>
+                    <th style="width: 50px;" class="text-center">Cantidad</th>
+                    <th class="text-center">Monto</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let pago of listaPagos.controls; let i = index" [formGroup]="getPagoFormGroup(pago)">
+                    <td class="text-center">{{ i + 1 }}</td>
+                    <td class="text-center">{{ getPagoFormGroup(pago).get('nombre')?.value }}</td>
+                    <td class="text-center"> {{getPagoFormGroup(pago).get('detalleTipo')?.value?
+                      this.retornarDetalleText(pago) :'-'}}</td>
+                    <td class="text-center fw-bold">
+                      {{ getPagoFormGroup(pago).get('monto')?.value }}
+                    </td>
+                    <td class="text-center">
+                      {{ getPagoFormGroup(pago).get('cantidad')?.value }}
+                    </td>
+                    <td class="text-center">{{ getPagoFormGroup(pago).get('montoTotal')?.value
+                      ?getPagoFormGroup(pago).get('montoTotal')?.value :'-'}}</td>
+                  </tr>
+                  <tr>
+                    <td colspan="5" class="text-end"><strong>Total:</strong></td>
+                    <td class="text-center fw-bold">
+                      <p class="text-right">
+                        <strong></strong> {{ calcularSumaMontoTotal() }}
+                      </p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <h5 class="mt-3 text-sunarp-cyan">Datos del pago y entrega</h5>
+            <div class="row mt-2">
+              <div class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">Monto a pagar <strong class="text-sunarp-red">(Debe agregar mínimo el 35%
+                    del monto)</strong></label>
+                <input formControlName="montoPagado" class="form-control-sunarp" type="text">
+              </div>
+              <div *ngIf="porcentajeSumaTotal!=null"
+                class="col-lg-6 col-md-12 mt-2 d-flex justify-content-center align-items-center">
+                <strong class="text-sunarp-cyan">El monto a pagar es el {{porcentajeSumaTotal}} % del pago
+                  total</strong>
+              </div>
+            </div>
+            <div class="row mt-2">
+              <div class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">Medio de Pago</label>
+                <ng-select formControlName="medioPago" bindLabel="nombre" bindValue="cod" placeholder="SELECCIONA">
+                  <ng-option [value]="''">SELECCIONA</ng-option>
+                  <ng-option *ngFor="let item of listaMedioPago" [value]="item.cod">
+                    {{item.nombre}}</ng-option>
+                </ng-select>
+              </div>
+              <div class="col-lg-6 col-md-12 mt-2">
+                <label class="label-sunarp">Fecha de Recojo</label>
+                <input formControlName="fechaRecojo" class="form-control-sunarp" type="date">
+              </div>
+            </div>
+            <div class="row mt-2">
+              <div class="col-md-12">
+                <label class="label-sunarp">Observacion (Opcional):</label>
+                <textarea formControlName="observacion" class="form-control-sunarp" maxlength="250"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div *ngIf="listaPagos.controls?.length>0" class="modal-footer d-flex justify-content-center">
+
+      <button (click)="modal_pago_va.close();" type="button" class="btn-sunarp-red"><i
+          class="fa fa-times icon-sunarp mr-2"></i>Salir</button>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #modal_ver_boleta let-c="close" let-d="dismiss">
+  <div class="modal-content">
+    <div class="modal-header bg-sunarp-gray-dark">
+      <h3 class="modal-title h3-sunarp text-white">BOLETA DE PAGO</h3>
+      <button tabindex="-1" type="button" class="close" aria-label="Close"
+        style="overflow:hidden; position: absolute; right: 30px; top: 3px;background-color: transparent;border: 0px;"
+        (click)="modal_ver_boleta_va.close();">
+        <span style="font-size:35px !important;" class="text-white">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body pl-5 pb-4 pr-5 pt-4">
+      <ngx-extended-pdf-viewer [base64Src]="contenidoBoletoVisor" [zoom]="250" [showToolbar]="false"
+        [showPresentationModeButton]="true" [showDownloadButton]="true" [showSecondaryToolbarButton]="false"
+        [showOpenFileButton]="false" (pdfLoaded)="spinner.hide();" class="pdf-viewer-custom">
+      </ngx-extended-pdf-viewer>
+    </div>
+    <div class="modal-footer d-flex justify-content-center">
+      <button (click)="imprimirBoleta()" type="button" class="btn-sunarp-cyan"><i
+          class="fa fa-print icon-sunarp mr-2"></i>Imprimir</button>
+      <button (click)="modal_ver_boleta_va.close();" type="button" class="btn-sunarp-red"><i
+          class="fa fa-times icon-sunarp mr-2"></i>Salir</button>
+    </div>
+  </div>
+</ng-template>

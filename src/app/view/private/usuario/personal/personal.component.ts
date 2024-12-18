@@ -726,7 +726,7 @@ export class PersonalComponent implements OnInit {
       icon: "warning",
       title: "¿Desea cancelar la boleta N° " + data.codigo + "?",
       text: "Esta procedimiento es permanente por lo que se recomienda verificar",
-      confirmButtonText: '<span style="padding: 0 12px;">Sí, anular</span>',
+      confirmButtonText: '<span style="padding: 0 12px;">Sí, cancelar</span>',
       showCancelButton: true,
       cancelButtonText: 'No, cancelar',
       cancelButtonColor: '#EB3219',
